@@ -2,7 +2,7 @@
 
 Pitch deck de **BytesBricks / SimPlant** publicado con GitHub Pages.
 
-**Ver online:** https://bytesbricksai.github.io/bytesbricks.github.io/
+**Ver online:** https://bytesbricksai.github.io/
 
 ## Qué es
 
