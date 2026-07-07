@@ -188,6 +188,7 @@ p strong,p b{color:var(--ink)}
 [data-cmp="tag"].vision{border-style:dashed;border-color:var(--muted);color:var(--muted);background:var(--bg)}
 [data-cmp="tag"].prospect{background:var(--paper-dim);border-color:var(--soft);color:var(--muted)}
 [data-cmp="tag"].alert{background:var(--accent);border-color:var(--accent);color:#fff}
+[data-cmp="tag"].lg{font-size:clamp(11px,1.3vw,14px);padding:5px 12px;letter-spacing:.06em}
 
 /* ═══ COMPONENTE: banda de reclamo (borde duro + franja superior) ═══ */
 [data-cmp="claim"]{
@@ -205,9 +206,16 @@ p strong,p b{color:var(--ink)}
 
 /* ═══ COMPONENTE: flujo tipográfico (nodo → nodo → nodo) ═══ */
 [data-cmp="flow"]{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:clamp(6px,1vw,14px);align-items:stretch}
-[data-cmp="flow"] .node{border:1.5px solid var(--ink);padding:clamp(9px,1.6vh,18px) clamp(10px,1.4vw,18px)}
-[data-cmp="flow"] .node strong{font-family:var(--display);font-weight:700;font-size:var(--t-h3);display:block}
-[data-cmp="flow"] .node span{display:block;font-size:var(--t-small);color:var(--muted);margin-top:6px;line-height:1.4}
+[data-cmp="flow"] .node{
+  border:1.5px solid var(--ink);
+  padding:clamp(16px,3vh,30px) clamp(12px,1.6vw,20px);
+  display:flex;align-items:center;justify-content:center;text-align:center;
+}
+[data-cmp="flow"] .node strong{
+  font-family:var(--display);font-weight:700;font-size:var(--t-big);
+  line-height:1.15;letter-spacing:-.01em;display:block;
+}
+[data-cmp="flow"] .node>span{display:block;font-size:var(--t-small);color:var(--muted);margin-top:6px;line-height:1.4}
 [data-cmp="flow"] .arrow{
   align-self:center;font-family:var(--display);font-weight:800;color:var(--accent);
   font-size:clamp(1.3rem,2.6vw,2.2rem);line-height:1;
@@ -287,7 +295,7 @@ html.js .slide.visible .rv{opacity:1;transform:none}
 @media(max-height:640px){
   :root{--t-sub:clamp(.78rem,1.3vw,.95rem);--t-body:clamp(.68rem,1.05vw,.85rem)}
   [data-cmp="stat"] span{font-size:var(--t-tiny)}
-  [data-cmp="flow"] .node span{display:none}
+  [data-cmp="flow"] .node>span{display:none}
   .nav-dots{display:none}
 }
 @media(max-height:520px){
@@ -365,7 +373,7 @@ html.js .slide.visible .rv{opacity:1;transform:none}
       <span class="es"><b>Validación en gemelo digital completa</b> · GTM liderado por comunidad · El primer piloto sombra pago es el hito que financia esta ronda</span>
       <span class="en"><b>Twin validation complete</b> · Community-led GTM · First paid shadow pilot is the milestone this raise funds</span>
     </div>
-    <div class="num">01 / 17</div>
+    <div class="num">01 / 15</div>
   </footer>
 </section>
 
@@ -414,7 +422,7 @@ html.js .slide.visible .rv{opacity:1;transform:none}
   </div>
   <footer data-cmp="foot">
     <div><span class="es">SimPlant · Autonomía restringida</span><span class="en">SimPlant · Restricted autonomy</span></div>
-    <div class="num">02 / 17</div>
+    <div class="num">02 / 15</div>
   </footer>
 </section>
 
@@ -456,7 +464,7 @@ html.js .slide.visible .rv{opacity:1;transform:none}
   </div>
   <footer data-cmp="foot">
     <div><span class="es">SimPlant · Autonomía restringida</span><span class="en">SimPlant · Restricted autonomy</span></div>
-    <div class="num">03 / 17</div>
+    <div class="num">03 / 15</div>
   </footer>
 </section>
 
@@ -492,7 +500,7 @@ html.js .slide.visible .rv{opacity:1;transform:none}
   </div>
   <footer data-cmp="foot">
     <div><span class="es">SimPlant · Autonomía restringida</span><span class="en">SimPlant · Restricted autonomy</span></div>
-    <div class="num">04 / 17</div>
+    <div class="num">04 / 15</div>
   </footer>
 </section>
 
@@ -511,20 +519,14 @@ html.js .slide.visible .rv{opacity:1;transform:none}
     <div data-cmp="flow" class="rv" style="--i:1">
       <div class="node">
         <strong><span class="es">Sensores</span><span class="en">Sensors</span></strong>
-        <span class="es">Tags de proceso, historia operativa, eventos de antorcha, señales de alivio.</span>
-        <span class="en">Process tags, operating history, flare events, relief signals.</span>
       </div>
       <div class="arrow" aria-hidden="true">→</div>
       <div class="node">
         <strong><span class="es">Gemelo digital</span><span class="en">Digital twin</span></strong>
-        <span class="es">Entorno calibrado por sitio para entrenar y validar antes de la planta real.</span>
-        <span class="en">Site-calibrated environment to train and validate before live plant.</span>
       </div>
       <div class="arrow" aria-hidden="true">→</div>
       <div class="node">
         <strong><span class="es">Política segura</span><span class="en">Safe policy</span></strong>
-        <span class="es">Control continuo acotado por límites de proceso, HSE y SIS — que nunca tocamos.</span>
-        <span class="en">Continuous control bounded by process, HSE, and SIS limits — which we never touch.</span>
       </div>
     </div>
     <div data-cmp="claim" class="rv" style="--i:2">
@@ -552,7 +554,7 @@ html.js .slide.visible .rv{opacity:1;transform:none}
       <span class="es">Historia simple: sensores → gemelo → política segura → restricciones → recomendaciones / control</span>
       <span class="en">Simple story: sensors → twin → safe policy → safety constraints → recommendations / control</span>
     </div>
-    <div class="num">05 / 17</div>
+    <div class="num">05 / 15</div>
   </footer>
 </section>
 
@@ -577,15 +579,17 @@ html.js .slide.visible .rv{opacity:1;transform:none}
     <div class="rulegrid cols3 rv" data-cmp="status" style="--i:2">
       <div>
         <span data-cmp="tag" class="today"><span class="es">Construido y operativo</span><span class="en">Built &amp; operational</span></span>
-        <p><span class="es">Plataforma SimPlant, pipeline de entrenamiento reproducible, política restringida entrenada y gemelo calibrado con dos proyectos reales de planta.</span><span class="en">SimPlant platform, reproducible training pipeline, trained constrained policy, and a digital twin calibrated from two real plant projects.</span></p>
+        <h3>SimPlant Trainer</h3>
+        <p style="margin-top:6px"><span class="es">Plataforma SimPlant, pipeline de entrenamiento reproducible, política restringida entrenada y gemelo calibrado con dos proyectos reales de planta.</span><span class="en">SimPlant platform, reproducible training pipeline, trained constrained policy, and a digital twin calibrated from two real plant projects.</span></p>
       </div>
       <div>
         <span data-cmp="tag" class="dev"><span class="es">Diseñado, aún no construido</span><span class="en">Designed, not yet built</span></span>
-        <p><span class="es">Gateway edge OPC-UA e integración OT: arquitectura definida, inferencia &lt;100 ms como restricción de diseño. <strong>Aún no desplegado contra OT en vivo.</strong></span><span class="en">OPC-UA edge gateway and OT integration: architecture defined, &lt;100 ms inference as a design constraint. <strong>Not yet deployed against live OT.</strong></span></p>
+        <h3>SimPlant Gateway</h3>
+        <p style="margin-top:6px"><span class="es">Gateway edge OPC-UA e integración OT: arquitectura definida, inferencia &lt;100 ms como restricción de diseño. <strong>Aún no desplegado contra OT en vivo.</strong></span><span class="en">OPC-UA edge gateway and OT integration: architecture defined, &lt;100 ms inference as a design constraint. <strong>Not yet deployed against live OT.</strong></span></p>
       </div>
       <div>
-        <span data-cmp="tag" class="sim"><span class="es">Validado solo en simulación</span><span class="en">Validated in simulation only</span></span>
-        <p><span class="es">Todas las métricas de desempeño de la slide 07 provienen del gemelo calibrado. Sin validación en planta real todavía.</span><span class="en">All performance metrics on slide 07 come from the calibrated twin. No live-plant validation yet.</span></p>
+        <h3>SimPlant Runtime</h3>
+        <p style="margin-top:6px"><span class="es">Motor de inferencia en el edge: política restringida, envolvente de seguridad activo y gobernanza de modelos.</span><span class="en">Edge inference engine: restricted policy, active safety envelope, and model governance.</span></p>
       </div>
     </div>
     <div class="grid2 rv" data-cmp="detail" style="--i:3">
@@ -603,14 +607,9 @@ html.js .slide.visible .rv{opacity:1;transform:none}
         </div>
       </div>
       <div class="stack">
-        <div class="rulegrid" style="grid-template-columns:1fr">
-          <div class="dim">
-            <p style="font-size:var(--t-small)"><span class="es"><strong>Construido desde cero por el founder:</strong> Soft Actor-Critic en PyTorch (replay buffer acotado, actor squashed-Gaussian, críticos gemelos, temperatura aprendible). Write-up técnico compartido en <strong>CACHE (Computer Aids for Chemical Engineering)</strong>.</span><span class="en"><strong>Built from scratch by the founder:</strong> Soft Actor-Critic in PyTorch (bounded replay buffer, squashed-Gaussian actor, twin critics, learnable temperature). Technical write-up shared in <strong>CACHE (Computer Aids for Chemical Engineering)</strong>.</span></p>
-          </div>
-        </div>
-        <div>
-          <span data-cmp="tag" class="sim"><span class="es">Procedencia de datos</span><span class="en">Data provenance</span></span>
-          <p style="font-size:var(--t-small)"><span class="es">Datos de calibración de dos proyectos reales de ingeniería, usados bajo derechos de ingeniería del founder y obligaciones de confidencialidad.</span><span class="en">Calibration data from two real engineering projects, used under founder engineering rights and confidentiality obligations.</span></p>
+        <div data-cmp="claim">
+          <span data-cmp="tag" class="sim lg"><span class="es">Validado solo en simulación</span><span class="en">Validated in simulation only</span></span>
+          <p style="font-size:var(--t-small)"><span class="es">Todas las métricas de desempeño de la slide 07 provienen del gemelo calibrado. <strong>Sin validación en planta real todavía.</strong></span><span class="en">All performance metrics on slide 07 come from the calibrated twin. <strong>No live-plant validation yet.</strong></span></p>
         </div>
       </div>
     </div>
@@ -620,7 +619,7 @@ html.js .slide.visible .rv{opacity:1;transform:none}
       <span class="es"><b>200 episodios de entrenamiento + 60 de despliegue · 0 violaciones del envolvente</b> · Ingeniería liderada por el founder</span>
       <span class="en"><b>200 training + 60 deployment episodes · 0 safety-envelope violations</b> · Founder-led engineering</span>
     </div>
-    <div class="num">06 / 17</div>
+    <div class="num">06 / 15</div>
   </footer>
 </section>
 
@@ -687,59 +686,11 @@ html.js .slide.visible .rv{opacity:1;transform:none}
   </div>
   <footer data-cmp="foot">
     <div><span class="es">Gemelo calibrado con dos proyectos reales de planta · sin datos de planta viva aún</span><span class="en">Twin calibrated from two real plant projects · no live-plant data yet</span></div>
-    <div class="num">07 / 17</div>
+    <div class="num">07 / 15</div>
   </footer>
 </section>
 
-<!-- ═══════════ 08 · SEÑALES TEMPRANAS Y MOTION DE ENTRADA ═══════════ -->
-<section class="slide" id="s8">
-  <header data-cmp="topbar">
-    <div>BytesBricks<span style="color:var(--accent)">.</span></div>
-    <div class="chip"><span class="es">07 · Señales y entrada</span><span class="en">07 · Early signals &amp; motion</span></div>
-    <div class="sect">Go-to-market</div>
-  </header>
-  <div class="content">
-    <div class="head">
-      <h2 class="rv" data-cmp="title" style="--i:0">
-        <span class="es"><em>Pre-revenue</em> — dicho sin vueltas. Señales tempranas reales y una estrategia de adquisición creíble.</span>
-        <span class="en"><em>Pre-revenue</em> — stated plainly. Real early signals and a credible acquisition strategy.</span>
-      </h2>
-      <p class="sub rv" data-cmp="sub" style="--i:1">
-        <span class="es">Sin clientes firmados todavía. Mostramos tracción de comunidad, motion de entrada y objetivos etiquetados con honestidad — no logos inflados.</span>
-        <span class="en">No signed customers yet. We show community traction, entry motion, and honestly labeled targets — not inflated logos.</span>
-      </p>
-    </div>
-    <div class="rulegrid split rv" data-cmp="gtm" style="--i:2">
-      <div>
-        <span data-cmp="tag" class="sim"><span class="es">Motion de entrada</span><span class="en">Entry motion</span></span>
-        <p><span class="es">La barrera de confianza es la restricción real — las refinerías no compran software cercano al control en frío. Nuestro motion la rodea:</span><span class="en">The trust barrier is the real constraint — refineries don't buy control-adjacent software cold. Our motion routes around it:</span></p>
-        <ul>
-          <li><span class="es"><strong>Cuña de baja barrera</strong> — herramienta de análisis/simulación que no toca OT ni control; la comunidad de ingeniería química la adopta libremente</span><span class="en"><strong>Low-barrier wedge</strong> — analytics/simulation tool that touches no OT and no control; chem-eng community adopts freely</span></li>
-          <li><span class="es"><strong>Motor de credibilidad</strong> — publicaciones en CACHE, construcción en público, advisor de O&amp;G con credenciales</span><span class="en"><strong>Credibility engine</strong> — CACHE publishing, building in public, credentialed O&amp;G advisor</span></li>
-          <li><span class="es"><strong>Canales sancionados</strong> — brazos de I+D corporativos (p. ej. Y-TEC de YPF), desafíos de innovación abierta, red de aceleradoras, eventos de industria</span><span class="en"><strong>Sanctioned channels</strong> — corporate R&amp;D arms (e.g., YPF's Y-TEC), open-innovation challenges, accelerator network, industry events</span></li>
-          <li><span class="es"><strong>Inbound</strong> — el primer pedido es casi cero: charla técnica de 30 min, análisis gratuito de datos de antorcha o NDA de datos — nunca un piloto pago en frío</span><span class="en"><strong>Inbound</strong> — first ask is near-zero: 30-min technical chat, free flaring-data analysis, or data NDA — never a cold paid pilot</span></li>
-        </ul>
-      </div>
-      <div>
-        <span data-cmp="tag" class="today"><span class="es">Señales tempranas</span><span class="en">Early signals</span></span>
-        <ul>
-          <li><span class="es">Trabajo técnico compartido en CACHE con recepción positiva</span><span class="en">Technical work shared in CACHE with positive reception</span></li>
-          <li><span class="es">Interés inbound generado desde el trabajo en GitHub</span><span class="en">Inbound interest generated from the GitHub work</span></li>
-        </ul>
-        <div style="margin-top:clamp(10px,2vh,18px)">
-          <span data-cmp="tag" class="prospect"><span class="es">Comprador objetivo · piloto pago futuro</span><span class="en">Target buyer · future paid pilot</span></span>
-          <p style="font-size:var(--t-small)"><span class="es">Sponsor económico: VP Ops / CFO. Sponsor técnico: Ingeniería de Procesos. Gatekeepers: HSE y Seguridad OT. <strong>ICP:</strong> refinerías downstream, 100–500 kbpd, presión por metano, presupuestos de modernización. <strong>Objetivo de LOI: Q4 2026.</strong></span><span class="en">Economic sponsor: VP Ops / CFO. Technical sponsor: Process Engineering. Gatekeepers: HSE &amp; OT Security. <strong>ICP:</strong> downstream refineries, 100–500 kbpd, methane pressure, modernization budgets. <strong>LOI target: Q4 2026.</strong></span></p>
-        </div>
-      </div>
-    </div>
-  </div>
-  <footer data-cmp="foot">
-    <div><span class="es">NOC-first, por puertas sancionadas — no venta fría</span><span class="en">NOC-first, through sanctioned doors — not cold sales</span></div>
-    <div class="num">08 / 17</div>
-  </footer>
-</section>
-
-<!-- ═══════════ 09 · OBJETIVOS Y CAMINO DE ENTRADA ═══════════ -->
+<!-- ═══════════ 08 · OBJETIVOS Y CAMINO DE ENTRADA ═══════════ -->
 <section class="slide" id="s9">
   <header data-cmp="topbar">
     <div>BytesBricks<span style="color:var(--accent)">.</span></div>
@@ -777,7 +728,7 @@ html.js .slide.visible .rv{opacity:1;transform:none}
   </div>
   <footer data-cmp="foot">
     <div><span class="es">Cada objetivo tiene una puerta definida · NOC-first, por canales sancionados</span><span class="en">Each target has a defined entry path · NOC-first, through sanctioned channels</span></div>
-    <div class="num">09 / 17</div>
+    <div class="num">08 / 15</div>
   </footer>
 </section>
 
@@ -838,7 +789,7 @@ html.js .slide.visible .rv{opacity:1;transform:none}
   </div>
   <footer data-cmp="foot">
     <div><span class="es"><b>Camino:</b> evaluación paga → sombra → asesoría supervisada → control autónomo restringido</span><span class="en"><b>Path:</b> paid evaluation → shadow → supervised advisory → constrained autonomous control</span></div>
-    <div class="num">10 / 17</div>
+    <div class="num">09 / 15</div>
   </footer>
 </section>
 
@@ -889,55 +840,15 @@ html.js .slide.visible .rv{opacity:1;transform:none}
   </div>
   <footer data-cmp="foot">
     <div><span class="es">SimPlant · Autonomía restringida</span><span class="en">SimPlant · Restricted autonomy</span></div>
-    <div class="num">11 / 17</div>
+    <div class="num">10 / 15</div>
   </footer>
 </section>
 
-<!-- ═══════════ 12 · DEFENSIBILIDAD ═══════════ -->
-<section class="slide" id="s12">
-  <header data-cmp="topbar">
-    <div>BytesBricks<span style="color:var(--accent)">.</span></div>
-    <div class="chip"><span class="es">10 · Defensibilidad</span><span class="en">10 · Moat</span></div>
-    <div class="sect">Moat</div>
-  </header>
-  <div class="content">
-    <h2 class="rv" data-cmp="title" style="--i:0">
-      <span class="es">Los incumbentes pueden copiar modelos. No pueden copiar rápido <em>el paquete de confianza</em>.</span>
-      <span class="en">Incumbents can copy models. They cannot quickly copy <em>the trust package</em>.</span>
-    </h2>
-    <div class="rulegrid cols3 rv" data-cmp="moats" style="--i:1">
-      <div>
-        <span data-cmp="tag" class="today"><span class="es">Moat de hoy</span><span class="en">Today's moat</span></span>
-        <h3><span class="es">Autoridad de dominio del founder + foso de datos de calibración propietarios + ventaja de tiempo.</span><span class="en">Founder domain authority + proprietary calibration-data moat + time advantage.</span></h3>
-        <p style="margin-top:8px"><span class="es">Dos proyectos reales de ingeniería calibran el gemelo — datos que los competidores no pueden comprar. Lógica PHA/LOPA, límites SIS, camino SIL, evidencia MOC.</span><span class="en">Two real engineering projects calibrate the twin — data competitors cannot buy. PHA/LOPA logic, SIS limits, SIL pathway, MOC evidence.</span></p>
-      </div>
-      <div>
-        <span data-cmp="tag" class="dev"><span class="es">Moat futuro</span><span class="en">Forward moat</span></span>
-        <h3><span class="es">El foso de datos se compone por despliegue — no existe hoy.</span><span class="en">The data moat compounds per deployment — not present today.</span></h3>
-        <p style="margin-top:8px"><span class="es">Cada sitio suma transitorios, historial de eventos, comportamiento de válvulas, modos de falla y restricciones aceptadas que los competidores no pueden comprar.</span><span class="en">Each site adds transients, event history, valve behavior, failure modes, and accepted constraints that competitors cannot purchase.</span></p>
-      </div>
-      <div>
-        <span data-cmp="tag" class="sim"><span class="es">Moat de despliegue</span><span class="en">Deployment moat</span></span>
-        <h3><span class="es">La integración OT es la barrera, no la UI.</span><span class="en">OT integration is the barrier, not the UI.</span></h3>
-        <p style="margin-top:8px"><span class="es">Semántica OPC-UA, postura IEC 62443, runtime de edge y ciclos de aceptación de planta.</span><span class="en">OPC-UA semantics, IEC 62443 posture, edge runtime, and plant acceptance cycles.</span></p>
-      </div>
-    </div>
-    <p data-cmp="bigline" class="rv" style="--i:2">
-      <span class="es"><em>¿Por qué no Honeywell / Siemens / Emerson / AspenTech?</em> Su stack optimiza control instalado y APC. Qué frena a AspenTech en 18 meses: nada estructural — nuestra defensa es la ventaja de dominio del founder y los datos propietarios de despliegue acumulándose desde el día uno.</span>
-      <span class="en"><em>Why not Honeywell / Siemens / Emerson / AspenTech?</em> Their stack optimizes installed control and APC. What stops AspenTech in 18 months: nothing structural — our defense is the founder's domain head-start and proprietary deployment data accumulating from day one.</span>
-    </p>
-  </div>
-  <footer data-cmp="foot">
-    <div><span class="es">SimPlant · Autonomía restringida</span><span class="en">SimPlant · Restricted autonomy</span></div>
-    <div class="num">12 / 17</div>
-  </footer>
-</section>
-
-<!-- ═══════════ 13 · GO-TO-MARKET ═══════════ -->
+<!-- ═══════════ 12 · GO-TO-MARKET ═══════════ -->
 <section class="slide" id="s13">
   <header data-cmp="topbar">
     <div>BytesBricks<span style="color:var(--accent)">.</span></div>
-    <div class="chip"><span class="es">11 · Go-to-market</span><span class="en">11 · Go-to-Market</span></div>
+    <div class="chip"><span class="es">10 · Go-to-market</span><span class="en">10 · Go-to-Market</span></div>
     <div class="sect"><span class="es">Distribución</span><span class="en">Distribution</span></div>
   </header>
   <div class="content">
@@ -978,7 +889,7 @@ html.js .slide.visible .rv{opacity:1;transform:none}
   </div>
   <footer data-cmp="foot">
     <div><span class="es">SimPlant · Autonomía restringida</span><span class="en">SimPlant · Restricted autonomy</span></div>
-    <div class="num">13 / 17</div>
+    <div class="num">11 / 15</div>
   </footer>
 </section>
 
@@ -986,7 +897,7 @@ html.js .slide.visible .rv{opacity:1;transform:none}
 <section class="slide" id="s14">
   <header data-cmp="topbar">
     <div>BytesBricks<span style="color:var(--accent)">.</span></div>
-    <div class="chip">12 · Roadmap</div>
+    <div class="chip">11 · Roadmap</div>
     <div class="sect">De-risking</div>
   </header>
   <div class="content">
@@ -1019,7 +930,7 @@ html.js .slide.visible .rv{opacity:1;transform:none}
   </div>
   <footer data-cmp="foot">
     <div><span class="es">SimPlant · Autonomía restringida</span><span class="en">SimPlant · Restricted autonomy</span></div>
-    <div class="num">14 / 17</div>
+    <div class="num">12 / 15</div>
   </footer>
 </section>
 
@@ -1027,7 +938,7 @@ html.js .slide.visible .rv{opacity:1;transform:none}
 <section class="slide" id="s15">
   <header data-cmp="topbar">
     <div>BytesBricks<span style="color:var(--accent)">.</span></div>
-    <div class="chip"><span class="es">13 · La ronda</span><span class="en">13 · Investment ask</span></div>
+    <div class="chip"><span class="es">12 · La ronda</span><span class="en">12 · Investment ask</span></div>
     <div class="sect"><span class="es">Uso de fondos</span><span class="en">Use of funds</span></div>
   </header>
   <div class="content">
@@ -1074,7 +985,7 @@ html.js .slide.visible .rv{opacity:1;transform:none}
   </div>
   <footer data-cmp="foot">
     <div><span class="es">SimPlant · Autonomía restringida</span><span class="en">SimPlant · Restricted autonomy</span></div>
-    <div class="num">15 / 17</div>
+    <div class="num">13 / 15</div>
   </footer>
 </section>
 
@@ -1082,7 +993,7 @@ html.js .slide.visible .rv{opacity:1;transform:none}
 <section class="slide" id="s16">
   <header data-cmp="topbar">
     <div>BytesBricks<span style="color:var(--accent)">.</span></div>
-    <div class="chip"><span class="es">14 · Equipo</span><span class="en">14 · Team</span></div>
+    <div class="chip"><span class="es">13 · Equipo</span><span class="en">13 · Team</span></div>
     <div class="sect"><span class="es">Autoridad</span><span class="en">Authority</span></div>
   </header>
   <div class="content">
@@ -1121,7 +1032,7 @@ html.js .slide.visible .rv{opacity:1;transform:none}
       <span class="es">Relación familiar declarada entre cofundadores · gobernanza con vesting de 4 años / cliff de 1 año</span>
       <span class="en">Family relationship declared between co-founders · governance with 4-year vesting / 1-year cliff</span>
     </div>
-    <div class="num">16 / 17</div>
+    <div class="num">14 / 15</div>
   </footer>
 </section>
 
@@ -1148,7 +1059,7 @@ html.js .slide.visible .rv{opacity:1;transform:none}
       <span class="es">La autonomía de control para infraestructura industrial es una categoría de plataforma — no una solución puntual. Rev 5 · Julio 2026.</span>
       <span class="en">Control autonomy for industrial infrastructure is a platform category — not a point solution. Rev 5 · July 2026.</span>
     </div>
-    <div class="num">17 / 17</div>
+    <div class="num">15 / 15</div>
   </footer>
 </section>
 
