@@ -166,6 +166,12 @@ p strong,p b{color:var(--ink)}
 .rulegrid .hl b{color:var(--hazard)}
 /* celda atenuada */
 .rulegrid .dim{background:var(--paper-dim)}
+/* celdas de módulo: solo título centrado (slide arquitectura) */
+.rulegrid .mod-tile{
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  min-height:clamp(100px,16vh,200px);
+}
+.rulegrid .mod-tile h2{font-size:clamp(1.1rem,2.4vw,2rem);max-width:none;letter-spacing:-.015em}
 
 /* ═══ COMPONENTE: celda de dato (número grande + descriptor) ═══ */
 [data-cmp="stat"] b{
@@ -577,19 +583,14 @@ html.js .slide.visible .rv{opacity:1;transform:none}
       </p>
     </div>
     <div class="rulegrid cols3 rv" data-cmp="status" style="--i:2">
-      <div>
-        <span data-cmp="tag" class="today"><span class="es">Construido y operativo</span><span class="en">Built &amp; operational</span></span>
-        <h3>SimPlant Trainer</h3>
-        <p style="margin-top:6px"><span class="es">Plataforma SimPlant, pipeline de entrenamiento reproducible, política restringida entrenada y gemelo calibrado con dos proyectos reales de planta.</span><span class="en">SimPlant platform, reproducible training pipeline, trained constrained policy, and a digital twin calibrated from two real plant projects.</span></p>
+      <div class="mod-tile">
+        <h2>SimPlant Trainer</h2>
       </div>
-      <div>
-        <span data-cmp="tag" class="dev"><span class="es">Diseñado, aún no construido</span><span class="en">Designed, not yet built</span></span>
-        <h3>SimPlant Gateway</h3>
-        <p style="margin-top:6px"><span class="es">Gateway edge OPC-UA e integración OT: arquitectura definida, inferencia &lt;100 ms como restricción de diseño. <strong>Aún no desplegado contra OT en vivo.</strong></span><span class="en">OPC-UA edge gateway and OT integration: architecture defined, &lt;100 ms inference as a design constraint. <strong>Not yet deployed against live OT.</strong></span></p>
+      <div class="mod-tile">
+        <h2>SimPlant Gateway</h2>
       </div>
-      <div>
-        <h3>SimPlant Runtime</h3>
-        <p style="margin-top:6px"><span class="es">Motor de inferencia en el edge: política restringida, envolvente de seguridad activo y gobernanza de modelos.</span><span class="en">Edge inference engine: restricted policy, active safety envelope, and model governance.</span></p>
+      <div class="mod-tile">
+        <h2>SimPlant Runtime</h2>
       </div>
     </div>
     <div class="grid2 rv" data-cmp="detail" style="--i:3">
@@ -1006,7 +1007,6 @@ html.js .slide.visible .rv{opacity:1;transform:none}
         <div class="init" aria-hidden="true">JM</div>
         <div>
           <h3>José Martín Rodriguez Mortaloni</h3>
-          <span data-cmp="tag" class="today" style="margin-bottom:0"><span class="es">CEO y cofundador · Lead Safe RL Engineer</span><span class="en">CEO &amp; Co-Founder · Lead Safe RL Engineer</span></span>
           <p><span class="es">Construyó desde cero el stack de Safe RL de SimPlant y la arquitectura edge OPC-UA. Publica trabajo técnico en CACHE. Ingeniería en Sistemas de Información (último año). Ingeniería liderada por el founder; contratación senior de ML/seguridad planificada.</span><span class="en">Built the SimPlant Safe RL stack and OPC-UA edge architecture from scratch. Publishes technical work in CACHE. Information Systems Engineering (final year). Founder-led engineering; senior ML/safety hire planned.</span></p>
         </div>
       </div>
@@ -1014,7 +1014,6 @@ html.js .slide.visible .rv{opacity:1;transform:none}
         <div class="init" aria-hidden="true">HR</div>
         <div>
           <h3>Ing. Humberto A. Rodriguez</h3>
-          <span data-cmp="tag" class="dev" style="margin-bottom:0"><span class="es">Autoridad de procesos y gemelo · Cofundador</span><span class="en">Process Authority &amp; Twin · Co-Founder</span></span>
           <p><span class="es">28+ años en ingeniería de O&amp;G. Traduce PHA/LOPA en restricciones CMDP estrictas. Fuente de los dos proyectos reales de ingeniería que calibran el gemelo (foso de datos propietario).</span><span class="en">28+ years in O&amp;G engineering. Translates PHA/LOPA into strict CMDP constraints. Source of the two real engineering projects that calibrate the twin (proprietary data moat).</span></p>
         </div>
       </div>
