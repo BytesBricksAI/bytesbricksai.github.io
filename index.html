@@ -3,1141 +3,1186 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BytesBricks · SimPlant — Pitch Deck (ES/EN)</title>
+<title>BytesBricks · SimPlant — Pitch Rev 8 (auditorio)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
 <style>
 /* ════════════════════════════════════════════════════════════════
-   BYTESBRICKS · SIMPLANT — PITCH DECK «HIPERLEGIBLE»
-   Señalética suiza de planta: blanco puro, reglas de 1.5px,
-   cero radios, rojo-señal + franja de peligro. Sin SVG: toda la
-   carga visual es tipografía y CSS — 100% vectorial.
+   BYTESBRICKS · SIMPLANT — PITCH REV 8 «AUDITORIO»
+   Regla de oro: 1 concepto por slide · 1 oración simple · 1 número
+   gigante o 1 gráfico como ancla visual. Nada de párrafos.
+   La honestidad (simulación, fuentes, sin contratos) vive en la
+   letra chica del pie — visible, pero sin competir con el orador.
 
-   SISTEMA DE COMPONENTES
-   Cada parte de una slide es un componente discreto y animable,
-   marcado con data-cmp="…" y la clase .rv (reveal). El stagger
-   se controla con la variable --i (delay = --i × 80ms).
-   Para agregar una animación propia a un componente:
-     [data-cmp="stat"] { … }                     ← estado final
-     .slide.visible [data-cmp="stat"] { … }      ← al entrar
-   El estado .visible lo pone el IntersectionObserver del final.
+   ESCENARIO FIJO 16:9
+   Cada slide se diseña a 1920×1080 y el escenario entero se escala
+   al viewport (letterbox si hace falta). El contenido NUNCA se
+   re-acomoda por dispositivo: siempre se ve la misma composición.
 
    IDIOMA
-   <html data-lang="es|en"> + spans .es/.en. Toggle con los
-   botones ES/EN o la tecla L. La elección persiste (localStorage).
+   <html data-lang="es|en"> + spans .es/.en. Toggle ES/EN o tecla L.
+   La elección persiste en localStorage.
+
+   EDICIÓN EN VIVO
+   Tecla E (o esquina superior izquierda) activa designMode:
+   se puede corregir cualquier texto. Ctrl+S descarga el HTML.
    ════════════════════════════════════════════════════════════════ */
+
+/* ═══ TOKENS DEL TEMA — mismos de la identidad «señalética» ═══ */
 :root{
+  --stage-bg:#0d0d0d;          /* letterbox alrededor del escenario */
+  --slide-bg:#ffffff;
   --bg:#ffffff;
   --ink:#141414;
-  --muted:#454545;
-  --line:#141414;             /* regla dura */
-  --soft:#d9d9d9;             /* regla suave */
-  --accent:#e03a00;           /* rojo-señal */
-  --hazard:#ffb100;           /* ámbar de franja */
-  --paper-dim:#f4f4f2;        /* fondo de celda alternativa */
+  --muted:#4a4a4a;
+  --faint:#8a8a8a;
+  --line:#141414;
+  --soft:#dcdcdc;
+  --accent:#e03a00;            /* rojo-señal */
+  --hazard:#ffb100;            /* ámbar de franja */
+  --paper-dim:#f4f4f2;
   --display:'Bricolage Grotesque',sans-serif;
   --body:'Atkinson Hyperlegible',sans-serif;
   --ease:cubic-bezier(.16,1,.3,1);
-
-  /* Escala fluida — todo clamp(), nada fijo */
-  --t-hero:clamp(1.9rem,5.4vw,5rem);
-  --t-h2:clamp(1.25rem,3.2vw,2.7rem);
-  --t-h3:clamp(.9rem,1.5vw,1.25rem);
-  --t-big:clamp(1rem,2.2vw,1.8rem);
-  --t-sub:clamp(.85rem,1.5vw,1.15rem);
-  --t-body:clamp(.72rem,1.15vw,.95rem);
-  --t-small:clamp(.62rem,.95vw,.8rem);
-  --t-tiny:clamp(.56rem,.85vw,.7rem);
-  --pad-x:clamp(18px,3.2vw,52px);
-  --pad-y:clamp(12px,2.4vh,32px);
-  --gap:clamp(10px,2vh,24px);
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;overflow-x:hidden}
-html{scroll-snap-type:y mandatory;scroll-behavior:smooth;background:var(--bg)}
-body{background:var(--bg);color:var(--ink);font-family:var(--body)}
+
+/* ===========================================
+   FIXED 16:9 STAGE: MANDATORY BASE STYLES
+   (viewport-base.css — completo, sin tocar)
+   =========================================== */
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: var(--stage-bg, #000);
+}
+.deck-viewport {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: var(--stage-bg, #000);
+}
+.deck-stage {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    transform-origin: 0 0;
+    background: var(--slide-bg, #fff);
+}
+.slide {
+    position: absolute;
+    inset: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    display: block;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    background: var(--slide-bg, #fff);
+}
+.slide.active,
+.slide.visible {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 1;
+}
+img,
+video,
+canvas,
+svg {
+    max-width: 100%;
+    max-height: 100%;
+}
+.deck-controls {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    z-index: 1000;
+}
+@media print {
+    html,
+    body {
+        width: 1920px;
+        height: auto;
+        overflow: visible;
+        background: #fff;
+    }
+    .deck-viewport {
+        position: static;
+        overflow: visible;
+        background: #fff;
+    }
+    .deck-stage {
+        position: static;
+        width: auto;
+        height: auto;
+        transform: none !important;
+        background: none;
+    }
+    .slide {
+        position: relative;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        width: 1920px;
+        height: 1080px;
+        break-after: page;
+        page-break-after: always;
+    }
+    .slide:last-child {
+        break-after: auto;
+        page-break-after: auto;
+    }
+    .deck-controls {
+        display: none !important;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.2s !important;
+    }
+}
+/* ============ fin viewport-base.css ============ */
+
+body{font-family:var(--body);color:var(--ink)}
+.slide{transition:opacity .45s var(--ease),visibility .45s}
 
 /* ═══ IDIOMA ═══ */
 html[data-lang="es"] .en{display:none!important}
 html[data-lang="en"] .es{display:none!important}
 .lang-switch{
-  position:fixed;top:0;right:0;z-index:100;display:flex;
-  border-left:1.5px solid var(--line);border-bottom:1.5px solid var(--line);
-  font-size:12px;font-weight:700;background:var(--bg);
+  position:fixed;top:0;right:0;z-index:1001;display:flex;
+  font-size:13px;font-weight:700;background:#fff;
+  border-left:2px solid var(--ink);border-bottom:2px solid var(--ink);
+  font-family:var(--body);
 }
-.lang-switch button{all:unset;cursor:pointer;padding:9px 15px;color:var(--muted)}
+.lang-switch button{all:unset;cursor:pointer;padding:10px 16px;color:var(--muted)}
 .lang-switch button.active{background:var(--ink);color:#fff}
 .lang-switch button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 
-/* ═══ PROGRESO + PUNTOS DE NAVEGACIÓN (cuadrados, no círculos) ═══ */
+/* ═══ BARRA DE PROGRESO (fuera del escenario) ═══ */
 .progress{
-  position:fixed;top:0;left:0;height:3px;width:100%;z-index:99;
-  background:var(--accent);transform-origin:0 0;transform:scaleX(0);
+  position:fixed;top:0;left:0;height:4px;width:100%;z-index:1000;
+  background:transparent;pointer-events:none;
 }
-.nav-dots{
-  position:fixed;right:clamp(8px,1.2vw,16px);top:50%;transform:translateY(-50%);
-  z-index:99;display:flex;flex-direction:column;gap:7px;
+.progress i{
+  display:block;height:100%;background:var(--accent);
+  transform-origin:0 0;transform:scaleX(0);transition:transform .4s var(--ease);
 }
-.nav-dots button{
-  all:unset;cursor:pointer;width:7px;height:7px;
-  border:1.5px solid var(--ink);background:transparent;opacity:.4;
-}
-.nav-dots button.active{background:var(--accent);border-color:var(--accent);opacity:1}
-.nav-dots button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
-/* ═══ SLIDE: encaje exacto en viewport ═══ */
-.slide{
-  width:100vw;height:100vh;height:100dvh;overflow:hidden;
-  scroll-snap-align:start;display:flex;flex-direction:column;
-  position:relative;background:var(--bg);
+/* ═══ PUNTOS DE NAVEGACIÓN (cuadrados, verticales, margen derecho) ═══
+   Pisa la posición de viewport-base.css: columna centrada a la derecha. */
+.deck-controls{
+  display:flex;flex-direction:column;gap:9px;
+  left:auto;right:18px;top:50%;bottom:auto;
+  transform:translateY(-50%);
 }
-/* Cabecera de cada slide */
-[data-cmp="topbar"]{
-  display:flex;justify-content:space-between;align-items:center;flex-shrink:0;gap:12px;
-  border-bottom:1.5px solid var(--line);
-  padding:clamp(8px,1.5vh,15px) var(--pad-x);
-  /* aire extra a la derecha para no chocar con el toggle ES/EN fijo */
-  padding-right:calc(var(--pad-x) + 88px);
-  font-weight:700;font-size:clamp(10px,1.15vw,13.5px);
+.deck-controls button{
+  all:unset;cursor:pointer;width:11px;height:11px;
+  border:2px solid #fff;background:transparent;opacity:.45;
 }
-[data-cmp="topbar"] .chip{
-  background:var(--accent);color:#fff;padding:3px 10px;font-family:var(--display);
-  font-weight:700;white-space:nowrap;
+.deck-controls button.active{background:var(--accent);border-color:var(--accent);opacity:1}
+.deck-controls button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ═══ MODO EDICIÓN ═══ */
+.edit-hotzone{position:fixed;top:0;left:0;width:80px;height:80px;z-index:1002;cursor:pointer}
+.edit-toggle{
+  position:fixed;top:14px;left:14px;z-index:1003;
+  font-family:var(--body);font-size:13px;font-weight:700;
+  background:#fff;border:2px solid var(--ink);padding:8px 14px;cursor:pointer;
+  opacity:0;pointer-events:none;transition:opacity .3s ease;
 }
-[data-cmp="topbar"] .sect{color:var(--muted);font-weight:700}
-/* Cuerpo */
-.content{
+.edit-toggle.show,.edit-toggle.active{opacity:1;pointer-events:auto}
+.edit-toggle.active{background:var(--accent);border-color:var(--accent);color:#fff}
+body.editing .deck-stage{outline:6px solid var(--accent);outline-offset:-6px}
+
+/* ════════════════════════════════════════════════════════════════
+   ANATOMÍA DE SLIDE — medidas fijas a 1920×1080
+   .top (cabecera 84px) · .mid (cuerpo) · .bot (pie 78px)
+   ════════════════════════════════════════════════════════════════ */
+.slide{display:flex;flex-direction:column}
+.top{
+  flex:0 0 84px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:2.5px solid var(--line);padding:0 64px;
+  font-weight:700;font-size:24px;font-family:var(--display);
+}
+.top .brand b{color:var(--accent)}
+.top .chip{background:var(--accent);color:#fff;padding:6px 18px;font-size:22px}
+.top .sect{color:var(--muted);font-size:21px;letter-spacing:.04em;text-transform:uppercase;padding-right:96px}
+.mid{
   flex:1;display:flex;flex-direction:column;justify-content:center;
-  gap:var(--gap);padding:var(--pad-y) var(--pad-x);
-  min-height:0;overflow:hidden;
+  padding:40px 96px;gap:42px;min-height:0;
 }
-/* Pie de cada slide */
-[data-cmp="foot"]{
-  flex-shrink:0;border-top:1.5px solid var(--line);
-  display:flex;justify-content:space-between;align-items:center;gap:16px;
-  padding:clamp(6px,1.2vh,12px) var(--pad-x);
-  font-size:clamp(9px,1vw,12px);color:var(--muted);
+.bot{
+  flex:0 0 78px;display:flex;align-items:center;justify-content:space-between;gap:40px;
+  border-top:2.5px solid var(--line);padding:0 64px;
 }
-[data-cmp="foot"] b{color:var(--ink)}
-[data-cmp="foot"] .num{font-family:var(--display);font-weight:700;color:var(--ink);white-space:nowrap}
+.bot .note{font-size:19px;color:var(--faint);line-height:1.3;max-width:1500px}
+.bot .note b{color:var(--muted)}
+.bot .num{font-family:var(--display);font-weight:800;font-size:26px;white-space:nowrap}
 
-/* ═══ TIPOGRAFÍA ═══ */
-h1,h2,h3,p{margin:0}
-h1{font-family:var(--display);font-weight:800;font-size:var(--t-hero);line-height:.98;letter-spacing:-.025em;max-width:15ch;text-wrap:balance}
-h2{font-family:var(--display);font-weight:800;font-size:var(--t-h2);line-height:1.02;letter-spacing:-.02em;max-width:26ch;text-wrap:balance}
-h3{font-family:var(--display);font-weight:700;font-size:var(--t-h3);line-height:1.15;letter-spacing:-.01em}
-h1 em,h2 em{font-style:normal;color:var(--accent)}
-.sub{font-size:var(--t-sub);line-height:1.5;color:var(--muted);max-width:60ch;text-wrap:pretty}
-.sub b,.sub strong{color:var(--ink)}
-p{font-size:var(--t-body);line-height:1.45;color:var(--muted)}
-p strong,p b{color:var(--ink)}
-.src{display:block;font-size:var(--t-tiny);color:#767676;margin-top:5px;line-height:1.3}
-
-/* ═══ COMPONENTE: kicker (una sola vez por slide, nunca decorativo) ═══ */
-[data-cmp="kicker"]{
-  font-family:var(--display);font-weight:700;font-size:clamp(10px,1.2vw,13px);
-  text-transform:uppercase;letter-spacing:.06em;color:var(--accent);
+/* ═══ TIPOGRAFÍA DE CONTENIDO ═══ */
+.kicker{
+  font-family:var(--display);font-weight:700;font-size:30px;
+  text-transform:uppercase;letter-spacing:.1em;color:var(--accent);
 }
+.kicker .tagchip{margin-left:18px}
+/* La oración: UNA por slide. Grande, legible desde el fondo. */
+.sent{
+  font-family:var(--display);font-weight:700;font-size:68px;line-height:1.06;
+  letter-spacing:-.015em;max-width:1560px;text-wrap:balance;
+}
+.sent em{font-style:normal;color:var(--accent)}
+/* Aclaración chica opcional (una línea) */
+.sub{font-size:32px;color:var(--muted);line-height:1.35;max-width:1400px}
+.sub b{color:var(--ink)}
 
-/* ═══ COMPONENTE: franja de peligro (firma del estilo) ═══ */
-[data-cmp="hazard"]{
-  height:clamp(7px,1.2vh,11px);width:min(400px,55%);flex-shrink:0;
-  background:repeating-linear-gradient(-45deg,var(--hazard) 0 13px,var(--ink) 13px 26px);
+/* ═══ NÚMERO GIGANTE — el ancla visual ═══ */
+.giant{font-family:var(--display);font-weight:800;line-height:.92;letter-spacing:-.03em}
+.giant .gnum{display:block}
+.giant .gword{display:block;color:var(--accent);letter-spacing:0}
+.g-center{text-align:center}
+
+/* ═══ ETIQUETA DE ESTADO (código de honestidad) ═══ */
+.tagchip{
+  display:inline-block;vertical-align:middle;
+  font-family:var(--display);font-weight:700;font-size:24px;
+  text-transform:uppercase;letter-spacing:.06em;
+  padding:6px 16px;border:2.5px solid var(--ink);background:#fff;color:var(--ink);
+}
+.tagchip.amber{background:var(--hazard);border-color:var(--hazard)}
+.tagchip.red{background:var(--accent);border-color:var(--accent);color:#fff}
+.tagchip.ghost{border-color:var(--soft);color:var(--muted)}
+
+/* ═══ FRANJA DE PELIGRO (firma visual) ═══ */
+.hazardbar{
+  height:14px;width:560px;
+  background:repeating-linear-gradient(-45deg,var(--hazard) 0 18px,var(--ink) 18px 36px);
   animation:stripes 16s linear infinite;
 }
-@keyframes stripes{to{background-position:-520px 0}}
+@keyframes stripes{to{background-position:-720px 0}}
 
-/* ═══ COMPONENTE: grilla con reglas (celdas, no tarjetas) ═══
-   El gap de 1.5px sobre fondo tinta dibuja las reglas — crisp y vectorial. */
-.rulegrid{
-  display:grid;gap:1.5px;background:var(--line);
-  border:1.5px solid var(--line);min-height:0;
+/* ═══ GRÁFICO: GRILLA DE CUADRADOS (autos / refinerías) ═══ */
+.sqgrid{display:grid;gap:12px}
+.sqgrid i{
+  display:block;background:var(--ink);
+  opacity:0;transform:scale(.3);
+  transition:opacity .4s var(--ease),transform .4s var(--ease);
+  transition-delay:calc(var(--i)*14ms + 350ms);
 }
-.rulegrid>*{background:var(--bg);padding:clamp(9px,1.7vh,20px) clamp(11px,1.6vw,22px);min-width:0;min-height:0}
-.cols2{grid-template-columns:repeat(2,1fr)}
-.cols3{grid-template-columns:repeat(3,1fr)}
-.cols4{grid-template-columns:repeat(4,1fr)}
-.split{grid-template-columns:1.15fr .85fr}
-/* celda destacada: bloque tinta */
-.rulegrid .hl{background:var(--ink);color:#fff}
-.rulegrid .hl h3,.rulegrid .hl strong{color:#fff}
-.rulegrid .hl p,.rulegrid .hl span{color:rgba(255,255,255,.78)}
-.rulegrid .hl b{color:var(--hazard)}
-/* celda atenuada */
-.rulegrid .dim{background:var(--paper-dim)}
-/* celdas de módulo: solo título centrado (slide arquitectura) */
-.rulegrid .mod-tile{
-  display:flex;align-items:center;justify-content:center;text-align:center;
-  min-height:clamp(100px,16vh,200px);
-}
-.rulegrid .mod-tile h2{font-size:clamp(1.1rem,2.4vw,2rem);max-width:none;letter-spacing:-.015em}
+.sqgrid i.hot{background:var(--accent)}
+.slide.visible .sqgrid i{opacity:1;transform:scale(1)}
+html:not(.js) .sqgrid i{opacity:1;transform:none}
 
-/* ═══ COMPONENTE: celda de dato (número grande + descriptor) ═══ */
-[data-cmp="stat"] b{
-  font-family:var(--display);font-weight:800;display:block;
-  font-size:clamp(1.3rem,3vw,2.7rem);letter-spacing:-.02em;line-height:1;
+/* ═══ GRÁFICO: BLOQUES «HOY» (mira/avisa/estabiliza) ═══ */
+.threeblocks{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+.threeblocks .blk{
+  border:3px solid var(--ink);background:var(--paper-dim);
+  padding:44px 20px;text-align:center;
+  font-family:var(--display);font-weight:700;font-size:52px;letter-spacing:.02em;
 }
-[data-cmp="stat"] span{display:block;font-size:var(--t-small);color:var(--muted);margin-top:6px;line-height:1.4}
-[data-cmp="stat"] span strong{color:var(--ink)}
+.threeblocks .blk .d{display:block;font-family:var(--body);font-weight:400;font-size:24px;color:var(--muted);margin-top:12px;letter-spacing:0}
+.bigred{
+  background:var(--accent);color:#fff;text-align:center;
+  font-family:var(--display);font-weight:800;font-size:120px;letter-spacing:-.02em;
+  padding:52px 20px;line-height:1;
+}
 
-/* ═══ COMPONENTE: etiqueta de estado (código de honestidad) ═══ */
-[data-cmp="tag"]{
-  display:inline-block;width:max-content;max-width:100%;
-  font-family:var(--display);font-weight:700;font-size:clamp(8.5px,1vw,11px);
-  text-transform:uppercase;letter-spacing:.05em;
-  padding:3px 8px;border:1.5px solid var(--ink);margin-bottom:clamp(6px,1.2vh,12px);
+/* ═══ GRÁFICO: JAULA DE REGLAS + FLUJO ═══ */
+.cage{
+  position:relative;border:3.5px solid var(--ink);padding:78px 60px 60px;
+  margin-top:16px;
 }
-[data-cmp="tag"].today{background:var(--ink);color:#fff}
-[data-cmp="tag"].dev{background:var(--hazard);border-color:var(--hazard);color:var(--ink)}
-[data-cmp="tag"].sim{background:var(--bg);color:var(--ink)}
-[data-cmp="tag"].vision{border-style:dashed;border-color:var(--muted);color:var(--muted);background:var(--bg)}
-[data-cmp="tag"].prospect{background:var(--paper-dim);border-color:var(--soft);color:var(--muted)}
-[data-cmp="tag"].alert{background:var(--accent);border-color:var(--accent);color:#fff}
-[data-cmp="tag"].lg{font-size:clamp(11px,1.3vw,14px);padding:5px 12px;letter-spacing:.06em}
-
-/* ═══ COMPONENTE: banda de reclamo (borde duro + franja superior) ═══ */
-[data-cmp="claim"]{
-  border:1.5px solid var(--ink);position:relative;
-  padding:clamp(12px,2.2vh,24px) clamp(14px,2vw,26px);
-  padding-top:calc(clamp(12px,2.2vh,24px) + 8px);
-}
-[data-cmp="claim"]::before{
-  content:"";position:absolute;top:0;left:0;right:0;height:8px;
-  background:repeating-linear-gradient(-45deg,var(--hazard) 0 11px,var(--ink) 11px 22px);
+.cage::before{ /* franja de peligro superior: la jaula es la marca */
+  content:"";position:absolute;top:0;left:0;right:0;height:16px;
+  background:repeating-linear-gradient(-45deg,var(--hazard) 0 16px,var(--ink) 16px 32px);
   animation:stripes 16s linear infinite;
 }
-[data-cmp="claim"] p{font-size:clamp(.78rem,1.3vw,1.05rem);color:var(--ink);line-height:1.5}
-[data-cmp="claim"] .fine{font-size:var(--t-tiny);color:#767676;margin-top:8px;line-height:1.45}
-
-/* ═══ COMPONENTE: flujo tipográfico (nodo → nodo → nodo) ═══ */
-[data-cmp="flow"]{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:clamp(6px,1vw,14px);align-items:stretch}
-[data-cmp="flow"] .node{
-  border:1.5px solid var(--ink);
-  padding:clamp(16px,3vh,30px) clamp(12px,1.6vw,20px);
-  display:flex;align-items:center;justify-content:center;text-align:center;
+.cage .cagelabel{
+  position:absolute;top:-26px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:#fff;font-family:var(--display);font-weight:700;
+  font-size:28px;text-transform:uppercase;letter-spacing:.08em;padding:10px 26px;white-space:nowrap;
 }
-[data-cmp="flow"] .node strong{
-  font-family:var(--display);font-weight:700;font-size:var(--t-big);
-  line-height:1.15;letter-spacing:-.01em;display:block;
+.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:30px;align-items:stretch}
+.flow .node{
+  border:3px solid var(--ink);padding:56px 20px;text-align:center;
+  font-family:var(--display);font-weight:800;font-size:64px;letter-spacing:-.01em;
 }
-[data-cmp="flow"] .node>span{display:block;font-size:var(--t-small);color:var(--muted);margin-top:6px;line-height:1.4}
-[data-cmp="flow"] .arrow{
+.flow .node.hot{background:var(--accent);border-color:var(--accent);color:#fff}
+.flow .arrow{
   align-self:center;font-family:var(--display);font-weight:800;color:var(--accent);
-  font-size:clamp(1.3rem,2.6vw,2.2rem);line-height:1;
-  animation:nudge 2.4s var(--ease) infinite;
+  font-size:76px;line-height:1;animation:nudge 2.4s var(--ease) infinite;
 }
-[data-cmp="flow"] .arrow:nth-of-type(4){animation-delay:1.2s}
-@keyframes nudge{0%,100%{transform:translateX(0)}12%{transform:translateX(6px)}24%{transform:translateX(0)}}
+.flow .arrow:last-of-type{animation-delay:1.2s}
+@keyframes nudge{0%,100%{transform:translateX(0)}12%{transform:translateX(10px)}24%{transform:translateX(0)}}
 
-/* ═══ COMPONENTE: fila de definición (término | descripción) ═══ */
-[data-cmp="row"]{
-  display:grid;grid-template-columns:clamp(100px,12vw,170px) 1fr;
-  gap:clamp(10px,1.6vw,20px);align-items:start;
-  border-top:1.5px solid var(--line);padding:clamp(7px,1.4vh,14px) 0;
+/* ═══ GRÁFICO: BLOQUE «NO SE TOCA» ═══ */
+.claimpanel{
+  position:relative;background:var(--accent);color:#fff;
+  padding:90px 60px 70px;text-align:center;
 }
-[data-cmp="row"] strong{font-family:var(--display);font-weight:700;font-size:var(--t-body);color:var(--ink)}
-[data-cmp="row"] p{font-size:var(--t-small);line-height:1.45}
-.rows-tight [data-cmp="row"]{padding:clamp(5px,1vh,10px) 0}
-
-/* ═══ COMPONENTE: lista con viñeta cuadrada (vectorial) ═══ */
-ul{list-style:none;display:grid;gap:clamp(4px,.9vh,9px);margin-top:clamp(6px,1.2vh,12px)}
-li{font-size:var(--t-small);line-height:1.45;color:var(--muted);padding-left:16px;position:relative}
-li::before{content:"";position:absolute;left:0;top:.42em;width:7px;height:7px;background:var(--accent)}
-li strong,li b{color:var(--ink)}
-
-/* ═══ COMPONENTE: línea grande de cierre ═══ */
-[data-cmp="bigline"]{
-  font-family:var(--display);font-weight:700;font-size:var(--t-big);
-  line-height:1.15;letter-spacing:-.015em;max-width:52ch;color:var(--ink);text-wrap:balance;
+.claimpanel::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:18px;
+  background:repeating-linear-gradient(-45deg,var(--hazard) 0 18px,var(--ink) 18px 36px);
+  animation:stripes 16s linear infinite;
 }
-[data-cmp="bigline"] em{font-style:normal;color:var(--accent)}
+.claimpanel .huge{font-family:var(--display);font-weight:800;font-size:170px;line-height:.95;letter-spacing:-.02em}
+.claimpanel .under{font-family:var(--body);font-size:36px;margin-top:30px;color:rgba(255,255,255,.92)}
 
-/* ═══ COMPONENTE: persona (bloque de iniciales + bio) ═══ */
-[data-cmp="person"]{display:flex;gap:clamp(10px,1.6vw,20px);align-items:flex-start}
-[data-cmp="person"] .init{
-  flex-shrink:0;width:clamp(42px,5vw,60px);height:clamp(42px,5vw,60px);
-  background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;
-  font-family:var(--display);font-weight:800;font-size:clamp(.85rem,1.6vw,1.3rem);
+/* ═══ GRÁFICO: BARRAS COMPARATIVAS (3×) ═══ */
+.bars{display:grid;gap:34px;width:100%}
+.bars .row{display:grid;grid-template-columns:340px 1fr;align-items:center;gap:30px}
+.bars .lbl{font-family:var(--display);font-weight:700;font-size:40px;text-transform:uppercase;letter-spacing:.02em}
+.bars .track{position:relative;height:86px}
+.bars .fill{
+  position:absolute;inset:0 auto 0 0;height:100%;
+  transform:scaleX(0);transform-origin:0 50%;
+  transition:transform 1s var(--ease) .55s;
 }
-[data-cmp="person"] h3{margin-bottom:4px}
-[data-cmp="person"] p{margin-top:6px}
-
-/* ═══ CABECERA DE SECCIÓN (kicker + h2 + sub) ═══ */
-.head{display:grid;gap:clamp(6px,1.2vh,12px)}
-
-/* ═══ LAYOUTS ═══ */
-.l-cover{flex-direction:row;display:grid;grid-template-columns:1.5fr 1fr;padding:0;gap:0}
-.l-cover .main{
-  padding:var(--pad-y) var(--pad-x);border-right:1.5px solid var(--line);
-  display:flex;flex-direction:column;justify-content:center;gap:clamp(12px,2.6vh,28px);min-width:0;
+.bars .fill.today{width:290px;background:var(--paper-dim);border:3px solid var(--ink)}
+.bars .fill.ours{width:958px;background:var(--accent)}
+.bars .fill b{
+  position:absolute;right:-24px;top:50%;transform:translate(100%,-50%);
+  font-family:var(--display);font-weight:800;font-size:52px;color:var(--ink);white-space:nowrap;
 }
-.l-cover .side{display:flex;flex-direction:column;min-width:0}
-.l-cover .side>div{
-  flex:1;display:flex;flex-direction:column;justify-content:center;
-  padding:clamp(8px,1.6vh,20px) clamp(14px,2vw,30px);
-  border-bottom:1.5px solid var(--line);min-height:0;
-}
-.l-cover .side>div:last-child{border-bottom:0}
-.l-cover .side .sign{background:var(--ink);color:#fff}
-.l-cover .side .sign b{color:var(--hazard)}
-.l-cover .side .sign span{color:rgba(255,255,255,.75)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,1.6vw,22px);min-height:0}
-.stack{display:grid;gap:clamp(8px,1.4vh,16px);align-content:start;min-height:0}
+.slide.visible .bars .fill{transform:scaleX(1)}
+html:not(.js) .bars .fill{transform:none}
 
-/* ═══ REVELADO POR COMPONENTE ═══
-   Visible por defecto (sin JS no se pierde nada). Con JS, cada .rv
-   parte oculto y entra al hacerse visible la slide, escalonado por --i. */
-html.js .rv{opacity:0;transform:translateY(16px);
-  transition:opacity .7s var(--ease),transform .7s var(--ease);
-  transition-delay:calc(var(--i,0)*80ms)}
+/* ═══ GRÁFICO: LÍNEA DE TIEMPO DEL PLAN (4 estaciones) ═══
+   Cuadrado lleno = hecho · contorno = por hacer · rojo = la meta. */
+.tl{display:grid;grid-template-columns:repeat(4,1fr)}
+.tl .st{position:relative;text-align:center}
+.tl .st .d{font-family:var(--display);font-weight:800;font-size:76px;letter-spacing:-.02em;line-height:1;white-space:nowrap}
+.tl .st .nd{position:relative;height:76px;margin:30px 0 24px}
+.tl .st .nd::before{ /* tramo de vía de esta estación */
+  content:"";position:absolute;top:50%;left:0;right:0;height:8px;
+  background:var(--ink);transform:translateY(-50%) scaleX(0);
+  transform-origin:0 50%;
+  transition:transform .7s var(--ease);transition-delay:calc(var(--i,0)*110ms);
+}
+.tl .st:first-child .nd::before{left:50%}
+.tl .st:last-child .nd::before{right:50%}
+.slide.visible .tl .st .nd::before{transform:translateY(-50%) scaleX(1)}
+html:not(.js) .tl .st .nd::before{transform:translateY(-50%)}
+.tl .st .sq{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:46px;height:46px;background:#fff;border:7px solid var(--ink);z-index:1;
+}
+.tl .st.done .sq{background:var(--ink)}
+.tl .st.goal .sq{background:var(--accent);border-color:var(--accent)}
+.tl .st.goal .d{color:var(--accent)}
+.tl .st .lb{font-size:30px;color:var(--muted);line-height:1.3;max-width:380px;margin:0 auto}
+.tl .st .lb b{color:var(--ink)}
+.tl .st.goal .lb b{color:var(--accent)}
+
+/* ═══ GRÁFICO: PANELES GEMELOS (negocio / equipo / clientes) ═══ */
+.twins{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+.panel{border:3.5px solid var(--ink);padding:52px 48px;background:#fff}
+.panel.dim{background:var(--paper-dim)}
+.panel.red{background:var(--accent);border-color:var(--accent);color:#fff}
+.panel .pnum{font-family:var(--display);font-weight:800;font-size:118px;line-height:.95;letter-spacing:-.03em}
+.panel .plbl{font-family:var(--display);font-weight:700;font-size:36px;margin-top:16px;text-transform:uppercase;letter-spacing:.03em}
+.panel.red .plbl{color:rgba(255,255,255,.9)}
+.panel .psub{font-size:28px;color:var(--muted);margin-top:12px}
+.panel.red .psub{color:rgba(255,255,255,.85)}
+
+/* ═══ GRÁFICO: FILAS DE CLIENTES ═══ */
+.targets{display:grid;gap:0;border:3.5px solid var(--ink)}
+.targets .trow{
+  display:flex;align-items:center;justify-content:space-between;gap:40px;
+  padding:44px 56px;border-bottom:3px solid var(--ink);background:#fff;
+}
+.targets .trow:last-child{border-bottom:0}
+.targets .tname{font-family:var(--display);font-weight:800;font-size:96px;letter-spacing:-.02em;line-height:1}
+.targets .tdoor{font-size:30px;color:var(--muted);text-align:right;white-space:nowrap}
+.targets .tdoor b{color:var(--ink)}
+.targets .trow.first{background:var(--ink);color:#fff}
+.targets .trow.first .tdoor{color:rgba(255,255,255,.8)}
+.targets .trow.first .tdoor b{color:var(--hazard)}
+
+/* ═══ GRÁFICO: ECUACIÓN DE LA RONDA ═══ */
+.eq{display:grid;grid-template-columns:auto auto auto auto auto;gap:34px;align-items:center;justify-content:start}
+.eq .box{
+  border:3.5px solid var(--ink);padding:44px 52px;text-align:center;background:#fff;
+}
+.eq .box .n{font-family:var(--display);font-weight:800;font-size:96px;line-height:1;letter-spacing:-.02em}
+.eq .box .l{font-family:var(--display);font-weight:700;font-size:28px;color:var(--muted);margin-top:10px;text-transform:uppercase;letter-spacing:.04em}
+.eq .box.red{background:var(--accent);border-color:var(--accent);color:#fff}
+.eq .box.red .l{color:rgba(255,255,255,.85)}
+.eq .sym{font-family:var(--display);font-weight:800;font-size:90px;color:var(--accent)}
+
+/* ═══ GRÁFICO: PERSONAS ═══ */
+.person{display:flex;gap:34px;align-items:center}
+.person .init{
+  flex:0 0 auto;width:120px;height:120px;background:var(--ink);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-weight:800;font-size:44px;
+}
+.person .init.red{background:var(--accent)}
+.person h3{font-family:var(--display);font-weight:800;font-size:42px;line-height:1.05}
+.person p{font-size:29px;color:var(--muted);margin-top:8px;line-height:1.3}
+.person p b{color:var(--ink)}
+
+/* ═══ LAYOUT AUXILIAR ═══ */
+.rowsplit{display:flex;align-items:center;gap:80px;min-height:0}
+.rowsplit>.grow{flex:1;min-width:0}
+.center{align-items:center;text-align:center}
+.center .sent,.center .sub{margin-left:auto;margin-right:auto}
+.center .hazardbar{margin-left:auto;margin-right:auto}
+
+/* ═══ REVELADO POR COMPONENTE (stagger con --i) ═══ */
+html.js .rv{
+  opacity:0;transform:translateY(28px);
+  transition:opacity .65s var(--ease),transform .65s var(--ease);
+  transition-delay:calc(var(--i,0)*110ms);
+}
+html.js .rv.pop{transform:translateY(0) scale(.93)}
 html.js .slide.visible .rv{opacity:1;transform:none}
-
-/* ═══ ENCAJE EN VIEWPORTS BAJOS ═══ */
-@media(max-height:760px){
-  :root{--t-hero:clamp(1.7rem,4.8vw,3.8rem);--t-h2:clamp(1.1rem,2.9vw,2.1rem);--gap:clamp(8px,1.6vh,16px)}
-  .src{display:none}
-}
-@media(max-height:640px){
-  :root{--t-sub:clamp(.78rem,1.3vw,.95rem);--t-body:clamp(.68rem,1.05vw,.85rem)}
-  [data-cmp="stat"] span{font-size:var(--t-tiny)}
-  [data-cmp="flow"] .node>span{display:none}
-  .nav-dots{display:none}
-}
-@media(max-height:520px){
-  [data-cmp="hazard"]{display:none}
-  li{font-size:var(--t-tiny)}
-}
-/* ═══ MÓVIL: colapso a una columna ═══ */
-@media(max-width:900px){
-  .slide{height:auto;min-height:100dvh}
-  .content{padding:clamp(16px,4vw,28px)}
-  .l-cover{grid-template-columns:1fr}
-  .l-cover .main{border-right:0;border-bottom:1.5px solid var(--line)}
-  .cols2,.cols3,.cols4,.split,.grid2{grid-template-columns:1fr}
-  [data-cmp="flow"]{grid-template-columns:1fr}
-  [data-cmp="flow"] .arrow{transform:rotate(90deg);justify-self:center;animation:none}
-  [data-cmp="row"]{grid-template-columns:1fr;gap:4px}
-  .nav-dots{display:none}
-  h1{max-width:100%}
-}
 @media(prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation:none!important;transition-duration:.01ms!important}
-  html{scroll-behavior:auto}
   html.js .rv{opacity:1;transform:none}
+  .sqgrid i{opacity:1!important;transform:none!important}
+  .bars .fill{transform:none!important}
+  .tl .st .nd::before{transform:translateY(-50%)!important}
 }
 </style>
 </head>
 <body>
 
-<div class="progress" role="presentation"></div>
+<div class="progress" role="presentation"><i></i></div>
 <div class="lang-switch" role="group" aria-label="Idioma / Language">
   <button data-set="es" class="active">ES</button>
   <button data-set="en">EN</button>
 </div>
-<nav class="nav-dots" aria-label="Navegación de slides"></nav>
+<div class="edit-hotzone" title="Modo edición (E)"></div>
+<button class="edit-toggle" id="editToggle" title="Modo edición (E) · Ctrl+S guarda">✎ <span class="es">Editar</span><span class="en">Edit</span></button>
 
-<!-- ═══════════ 01 · PORTADA ═══════════ -->
-<section class="slide" id="s1">
-  <header data-cmp="topbar">
-    <div>BytesBricks<span style="color:var(--accent)">.</span></div>
+<div class="deck-viewport">
+<main class="deck-stage" id="deckStage">
+
+<!-- ═══════════ 01 · EL MERCADO (Oil & Gas) ═══════════
+     Concepto: la industria es gigante. Ancla: US$ 8,3 billones. -->
+<section class="slide active" id="s1">
+  <header class="top">
+    <div class="brand">BytesBricks<b>.</b></div>
     <div class="chip">SimPlant</div>
-    <div class="sect">Seed 2026</div>
+    <div class="sect"><span class="es">El mercado</span><span class="en">The market</span></div>
   </header>
-  <div class="content l-cover">
-    <div class="main">
-      <h1 class="rv" data-cmp="title" style="--i:0">
-        <span class="es">Autonomía <em>restringida</em> para infraestructura industrial crítica.</span>
-        <span class="en">Restricted <em>autonomy</em> for critical industrial infrastructure.</span>
-      </h1>
-      <div data-cmp="hazard" class="rv" style="--i:1" role="presentation"></div>
-      <p class="sub rv" data-cmp="sub" style="--i:2">
-        <span class="es">Empezamos optimizando el gas de antorcha en refinerías: menos desperdicio, menos emisiones, la misma seguridad operativa.</span>
-        <span class="en">We start by optimizing refinery flare gas: less waste, fewer emissions, same operational safety.</span>
-      </p>
+  <div class="mid center">
+    <div class="kicker rv" style="--i:0"><span class="es">Petróleo y gas</span><span class="en">Oil &amp; gas</span></div>
+    <div class="giant g-center rv pop" style="--i:1">
+      <span class="es"><span class="gnum" style="font-size:330px">US$ 8,3</span><span class="gword" style="font-size:150px">BILLONES</span></span>
+      <span class="en"><span class="gnum" style="font-size:330px">US$ 8.3</span><span class="gword" style="font-size:150px">TRILLION</span></span>
     </div>
-    <div class="side">
-      <div data-cmp="stat" class="rv" style="--i:1">
-        <b>151 bcm</b>
-        <span class="es">Gas quemado en antorchas a nivel global · 2024</span>
-        <span class="en">Gas flared globally · 2024</span>
-      </div>
-      <div data-cmp="stat" class="rv" style="--i:2">
-        <b>US$63B</b>
-        <span class="es">Valor energético perdido por año — alimentación desperdiciada</span>
-        <span class="en">Energy value lost per year — wasted feedstock</span>
-      </div>
-      <div data-cmp="stat" class="sign rv" style="--i:3">
-        <b>0</b>
-        <span class="es">Violaciones del envolvente de seguridad en 260 episodios simulados</span>
-        <span class="en">Safety-envelope violations across 260 simulated episodes</span>
-      </div>
-    </div>
-  </div>
-  <footer data-cmp="foot">
-    <div>
-      <span class="es"><b>Validación en gemelo digital completa</b> · GTM liderado por comunidad · El primer piloto sombra pago es el hito que financia esta ronda</span>
-      <span class="en"><b>Twin validation complete</b> · Community-led GTM · First paid shadow pilot is the milestone this raise funds</span>
-    </div>
-    <div class="num">01 / 15</div>
-  </footer>
-</section>
-
-<!-- ═══════════ 02 · PROBLEMA ECONÓMICO ═══════════ -->
-<section class="slide" id="s2">
-  <header data-cmp="topbar">
-    <div>BytesBricks<span style="color:var(--accent)">.</span></div>
-    <div class="chip"><span class="es">01 · Problema económico</span><span class="en">01 · Economic problem</span></div>
-    <div class="sect"><span class="es">Dolor</span><span class="en">Pain</span></div>
-  </header>
-  <div class="content">
-    <div class="head">
-      <h2 class="rv" data-cmp="title" style="--i:0">
-        <span class="es">Las refinerías queman margen, presupuesto de carbono y capacidad operativa en la <em>antorcha</em>.</span>
-        <span class="en">Refineries burn margin, carbon budget, and operating capacity at the <em>flare stack</em>.</span>
-      </h2>
-      <p class="sub rv" data-cmp="sub" style="--i:1">
-        <span class="es">La antorcha se trata como un punto de seguridad. En la práctica es una palanca continua de rentabilidad, emisiones y cumplimiento.</span>
-        <span class="en">The flare is treated as a safety point. In practice it is a continuous lever for profitability, emissions, and compliance.</span>
-      </p>
-    </div>
-    <div class="rulegrid cols3 rv" data-cmp="stats" style="--i:2">
-      <div data-cmp="stat">
-        <b>151 bcm</b>
-        <span class="es">Gas quemado en antorchas a nivel global en 2024. Magnitud del mercado — no un modelo de ingresos directo.<span class="src">Fuente: World Bank Global Gas Flaring Tracker, 2024</span></span>
-        <span class="en">Gas flared globally in 2024. Market magnitude — not a direct revenue model.<span class="src">Source: World Bank Global Gas Flaring Tracker, 2024</span></span>
-      </div>
-      <div data-cmp="stat">
-        <b>389 MtCO₂e</b>
-        <span class="es">Emisiones de la quema en antorcha convencional. La regulación ya no es opcional.<span class="src">Fuente: World Bank GGFR / estimaciones de metano IEA</span></span>
-        <span class="en">Emissions from conventional flaring. Regulation is no longer optional.<span class="src">Source: World Bank GGFR / IEA methane estimates</span></span>
-      </div>
-      <div data-cmp="stat">
-        <b>US$63B</b>
-        <span class="es">Valor energético anual perdido estimado. Alimentación desperdiciada — no solo narrativa ESG.<span class="src">Fuente: World Bank Global Gas Flaring Reduction Partnership</span></span>
-        <span class="en">Estimated annual energy value lost. Wasted feedstock — not just ESG narrative.<span class="src">Source: World Bank Global Gas Flaring Reduction Partnership</span></span>
-      </div>
-    </div>
-    <div data-cmp="claim" class="rv" style="--i:3">
-      <span data-cmp="tag" class="sim"><span class="es">SOM · de abajo hacia arriba</span><span class="en">SOM · bottoms-up</span></span>
-      <p>
-        <span class="es"><strong>~25 refinerías con antorcha en el beachhead LATAM</strong> × <strong>US$200–800K de ARR realista por sitio</strong> × <strong>5–10% de penetración alcanzable en 5 años</strong> = <strong>US$25–200M de mercado obtenible</strong>. Construido desde la base — no desde el titular de US$63B.</span>
-        <span class="en"><strong>~25 flare-equipped refineries in LATAM beachhead</strong> × <strong>US$200–800K realistic ARR/site</strong> × <strong>5–10% achievable penetration over 5 years</strong> = <strong>US$25–200M serviceable obtainable market</strong>. Built from the ground up — not from the US$63B headline.</span>
-      </p>
-    </div>
-  </div>
-  <footer data-cmp="foot">
-    <div><span class="es">SimPlant · Autonomía restringida</span><span class="en">SimPlant · Restricted autonomy</span></div>
-    <div class="num">02 / 15</div>
-  </footer>
-</section>
-
-<!-- ═══════════ 03 · POR QUÉ FALLAN LOS SISTEMAS ACTUALES ═══════════ -->
-<section class="slide" id="s3">
-  <header data-cmp="topbar">
-    <div>BytesBricks<span style="color:var(--accent)">.</span></div>
-    <div class="chip"><span class="es">02 · Por qué falla el stack actual</span><span class="en">02 · Why current systems fail</span></div>
-    <div class="sect">Status quo</div>
-  </header>
-  <div class="content">
-    <h2 class="rv" data-cmp="title" style="--i:0">
-      <span class="es">El stack de hoy detecta, reporta o estabiliza. <em>No optimiza de forma autónoma</em> dentro de límites de seguridad.</span>
-      <span class="en">Today's stack detects, reports, or stabilizes. It does <em>not autonomously optimize</em> within safety limits.</span>
-    </h2>
-    <div class="rulegrid cols4 rv" data-cmp="matrix" style="--i:1">
-      <div>
-        <h3>LDAR / <span class="es">cámaras</span><span class="en">cameras</span></h3>
-        <p style="margin-top:8px"><span class="es">Encuentran fugas y eventos. No cambian la política de control.</span><span class="en">Find leaks and events. Do not change control policy.</span></p>
-      </div>
-      <div>
-        <h3>DCS / PID</h3>
-        <p style="margin-top:8px"><span class="es">Mantienen la planta estable. No aprenden trade-offs económicos.</span><span class="en">Keep the plant stable. Do not learn economic trade-offs.</span></p>
-      </div>
-      <div>
-        <h3>APC / MPC</h3>
-        <p style="margin-top:8px"><span class="es">Potentes en rangos conocidos. Frágiles en transitorios y límites de seguridad.</span><span class="en">Powerful in known ranges. Fragile on transients and safety limits.</span></p>
-      </div>
-      <div class="hl">
-        <span data-cmp="tag" class="alert"><span class="es">Nosotros</span><span class="en">Us</span></span>
-        <h3>SimPlant</h3>
-        <p style="margin-top:8px"><span class="es">Capa de control autónomo restringido: entrenada en gemelo digital, desplegada en el edge, acotada por reglas de seguridad.</span><span class="en">Restricted autonomous control layer: trained on digital twin, deployed at edge, bounded by safety rules.</span></p>
-      </div>
-    </div>
-    <p data-cmp="bigline" class="rv" style="--i:2">
-      <span class="es"><em>La brecha:</em> nadie es dueño de la capa de control autónomo restringido para sistemas de antorcha.</span>
-      <span class="en"><em>The gap:</em> no one owns the restricted autonomous control layer for flare systems.</span>
+    <div class="hazardbar rv" style="--i:2"></div>
+    <p class="sent rv" style="--i:3;font-size:56px">
+      <span class="es">Una de las industrias más grandes del mundo, <em>todos los años</em>.</span>
+      <span class="en">One of the biggest industries on Earth, <em>every single year</em>.</span>
     </p>
   </div>
-  <footer data-cmp="foot">
-    <div><span class="es">SimPlant · Autonomía restringida</span><span class="en">SimPlant · Restricted autonomy</span></div>
-    <div class="num">03 / 15</div>
+  <footer class="bot">
+    <div class="note">
+      <span class="es">Billones = millones de millones. Fuente: The Business Research Company — mercado global de petróleo y gas, 2025.</span>
+      <span class="en">Source: The Business Research Company — global oil &amp; gas market, 2025.</span>
+    </div>
+    <div class="num">01 / 16</div>
   </footer>
 </section>
 
-<!-- ═══════════ 04 · POR QUÉ AHORA ═══════════ -->
+<!-- ═══════════ 02 · EL PROBLEMA: LA LLAMA ═══════════
+     Concepto: la antorcha quema plata. Ancla: US$63.000 M centrado. -->
+<section class="slide" id="s2">
+  <header class="top">
+    <div class="brand">BytesBricks<b>.</b></div>
+    <div class="chip">SimPlant</div>
+    <div class="sect"><span class="es">El problema</span><span class="en">The problem</span></div>
+  </header>
+  <div class="mid center">
+    <div class="kicker rv" style="--i:0"><span class="es">La antorcha</span><span class="en">The flare</span></div>
+    <p class="sent rv" style="--i:1">
+      <span class="es">Esa llama que ves en toda refinería es <em>plata quemándose</em>.</span>
+      <span class="en">That flame you see at every refinery is <em>money burning</em>.</span>
+    </p>
+    <div class="giant g-center rv pop" style="--i:2">
+      <span class="es"><span class="gnum" style="font-size:190px">US$ 63.000</span><span class="gword" style="font-size:96px">MILLONES POR AÑO</span></span>
+      <span class="en"><span class="gnum" style="font-size:190px">US$ 63</span><span class="gword" style="font-size:96px">BILLION A YEAR</span></span>
+    </div>
+  </div>
+  <footer class="bot">
+    <div class="note">
+      <span class="es">Gas quemado en antorchas en el mundo: 151.000 millones de m³ (2024). Fuente: Banco Mundial, Global Gas Flaring Tracker.</span>
+      <span class="en">Gas flared worldwide: 151 bcm (2024). Source: World Bank, Global Gas Flaring Tracker.</span>
+    </div>
+    <div class="num">02 / 16</div>
+  </footer>
+</section>
+
+<!-- ═══════════ 03 · EL PROBLEMA: CONTAMINA ═══════════
+     Concepto: además contamina. Ancla: 84 millones de autos + grilla. -->
+<section class="slide" id="s3">
+  <header class="top">
+    <div class="brand">BytesBricks<b>.</b></div>
+    <div class="chip">SimPlant</div>
+    <div class="sect"><span class="es">El problema</span><span class="en">The problem</span></div>
+  </header>
+  <div class="mid">
+    <div class="rowsplit">
+      <div class="grow">
+        <div class="kicker rv" style="--i:0"><span class="es">Y además contamina</span><span class="en">And it pollutes too</span></div>
+        <p class="sent rv" style="--i:1;margin-top:26px">
+          <span class="es">Esa llama contamina lo mismo que <em>84 millones de autos</em>.</span>
+          <span class="en">That flame pollutes as much as <em>84 million cars</em>.</span>
+        </p>
+        <div class="giant rv pop" style="--i:2;margin-top:48px">
+          <span class="es"><span class="gnum" style="font-size:200px">84.000.000</span><span class="gword" style="font-size:92px">DE AUTOS</span></span>
+          <span class="en"><span class="gnum" style="font-size:200px">84,000,000</span><span class="gword" style="font-size:92px">CARS</span></span>
+        </div>
+      </div>
+      <!-- 1 cuadrado = 1 millón de autos (84 cuadrados, los genera JS) -->
+      <div class="sqgrid rv" style="--i:1;grid-template-columns:repeat(7,44px);grid-auto-rows:44px"
+           data-squares="84" data-hot="0" aria-hidden="true"></div>
+    </div>
+  </div>
+  <footer class="bot">
+    <div class="note">
+      <span class="es">389 millones de toneladas de CO₂e por año (Banco Mundial) ÷ 4,6 t de CO₂ por auto y por año (EPA) ≈ 84 millones de autos. Cada cuadrado = 1 millón de autos.</span>
+      <span class="en">389 Mt CO₂e per year (World Bank) ÷ 4.6 t CO₂ per car per year (EPA) ≈ 84 million cars. Each square = 1 million cars.</span>
+    </div>
+    <div class="num">03 / 16</div>
+  </footer>
+</section>
+
+<!-- ═══════════ 04 · HOY: NADIE DECIDE ═══════════
+     Concepto: los sistemas actuales no deciden. Ancla: bloque rojo gigante. -->
 <section class="slide" id="s4">
-  <header data-cmp="topbar">
-    <div>BytesBricks<span style="color:var(--accent)">.</span></div>
-    <div class="chip"><span class="es">03 · Por qué ahora</span><span class="en">03 · Why now</span></div>
-    <div class="sect">Timing</div>
+  <header class="top">
+    <div class="brand">BytesBricks<b>.</b></div>
+    <div class="chip">SimPlant</div>
+    <div class="sect"><span class="es">Hoy</span><span class="en">Today</span></div>
   </header>
-  <div class="content">
-    <h2 class="rv" data-cmp="title" style="--i:0">
-      <span class="es">Tres fuerzas hacen <em>invertible hoy</em> la autonomía industrial restringida.</span>
-      <span class="en">Three forces make restricted industrial autonomy <em>investable today</em>.</span>
-    </h2>
-    <div class="rulegrid cols3 rv" data-cmp="forces" style="--i:1">
-      <div>
-        <span data-cmp="tag" class="today"><span class="es">Tracción económica</span><span class="en">Economic pull</span></span>
-        <h3><span class="es">El gas recuperado es alimentación con valor inmediato en el P&amp;L — el caso del comprador es económico primero.</span><span class="en">Recovered flare gas is feedstock with immediate P&amp;L value — the buyer's case is economic first.</span></h3>
-        <p style="margin-top:8px"><span class="es">En LATAM, los operadores recuperan margen de gas que de otro modo se quemaría. El ROI no depende solo de créditos de carbono.</span><span class="en">In LATAM, operators recover margin from gas that would otherwise be burned. The ROI case does not depend on carbon credits alone.</span></p>
-      </div>
-      <div>
-        <span data-cmp="tag" class="sim"><span class="es">Presión regulatoria</span><span class="en">Regulatory pull</span></span>
-        <h3><span class="es">La rendición de cuentas por metano se endurece — pasa del reporte a la prueba.</span><span class="en">Methane accountability is tightening — moving from reporting to proof.</span></h3>
-        <p style="margin-top:8px"><span class="es">EU 2024/1787, OGMP 2.0, EPA y regímenes regionales de carbono empujan hacia reducciones medibles — también donde vendemos.</span><span class="en">EU 2024/1787, OGMP 2.0, EPA, and regional carbon regimes push operators toward measurable reductions — including where we sell.</span></p>
-      </div>
-      <div>
-        <span data-cmp="tag" class="sim"><span class="es">Madurez técnica</span><span class="en">Technical maturity</span></span>
-        <h3><span class="es">La IA segura, los gemelos digitales y la inferencia en el edge cruzaron el umbral de despliegue.</span><span class="en">Safe AI, digital twins, and edge inference crossed the deployment threshold.</span></h3>
-        <p style="margin-top:8px"><span class="es">Ya no es un modelo de laboratorio: una política de control acotada que puede operar cerca de sistemas OT — con el SIS intacto.</span><span class="en">No longer a lab model: a bounded control policy that can operate near OT systems — with the SIS untouched.</span></p>
-      </div>
+  <div class="mid">
+    <div class="kicker rv" style="--i:0"><span class="es">¿Por qué sigue pasando?</span><span class="en">Why does it keep happening?</span></div>
+    <p class="sent rv" style="--i:1">
+      <span class="es">Los sistemas de hoy miran y avisan.</span>
+      <span class="en">Today's systems watch and warn.</span>
+    </p>
+    <div class="threeblocks rv" style="--i:2">
+      <div class="blk"><span class="es">MIRA</span><span class="en">WATCHES</span><span class="d"><span class="es">cámaras y sensores</span><span class="en">cameras &amp; sensors</span></span></div>
+      <div class="blk"><span class="es">AVISA</span><span class="en">WARNS</span><span class="d"><span class="es">alarmas y reportes</span><span class="en">alarms &amp; reports</span></span></div>
+      <div class="blk"><span class="es">ESTABILIZA</span><span class="en">STEADIES</span><span class="d"><span class="es">control clásico</span><span class="en">classic control</span></span></div>
+    </div>
+    <div class="bigred rv pop" style="--i:3">
+      <span class="es">NADIE DECIDE.</span><span class="en">NO ONE DECIDES.</span>
     </div>
   </div>
-  <footer data-cmp="foot">
-    <div><span class="es">SimPlant · Autonomía restringida</span><span class="en">SimPlant · Restricted autonomy</span></div>
-    <div class="num">04 / 15</div>
+  <footer class="bot">
+    <div class="note">
+      <span class="es">Cámaras/LDAR detectan · DCS/PID estabilizan · APC optimiza solo en rangos conocidos. Ninguno maneja la antorcha para ganar plata.</span>
+      <span class="en">Cameras/LDAR detect · DCS/PID stabilize · APC optimizes only in known ranges. None runs the flare to make money.</span>
+    </div>
+    <div class="num">04 / 16</div>
   </footer>
 </section>
 
-<!-- ═══════════ 05 · QUÉ HACE SIMPLANT ═══════════ -->
+<!-- ═══════════ 05 · LA SOLUCIÓN: SIMPLANT ═══════════
+     Concepto: IA que decide dentro de una jaula de reglas. Ancla: la jaula. -->
 <section class="slide" id="s5">
-  <header data-cmp="topbar">
-    <div>BytesBricks<span style="color:var(--accent)">.</span></div>
-    <div class="chip"><span class="es">04 · Qué hace SimPlant</span><span class="en">04 · What SimPlant does</span></div>
-    <div class="sect"><span class="es">Producto</span><span class="en">Product</span></div>
+  <header class="top">
+    <div class="brand">BytesBricks<b>.</b></div>
+    <div class="chip">SimPlant</div>
+    <div class="sect"><span class="es">La solución</span><span class="en">The solution</span></div>
   </header>
-  <div class="content">
-    <h2 class="rv" data-cmp="title" style="--i:0">
-      <span class="es">SimPlant convierte la antorcha de la refinería en un <em>lazo de optimización restringido</em>.</span>
-      <span class="en">SimPlant turns the refinery flare into a <em>restricted optimization loop</em>.</span>
-    </h2>
-    <div data-cmp="flow" class="rv" style="--i:1">
-      <div class="node">
-        <strong><span class="es">Sensores</span><span class="en">Sensors</span></strong>
-      </div>
-      <div class="arrow" aria-hidden="true">→</div>
-      <div class="node">
-        <strong><span class="es">Gemelo digital</span><span class="en">Digital twin</span></strong>
-      </div>
-      <div class="arrow" aria-hidden="true">→</div>
-      <div class="node">
-        <strong><span class="es">Política segura</span><span class="en">Safe policy</span></strong>
-      </div>
-    </div>
-    <div data-cmp="claim" class="rv" style="--i:2">
-      <span data-cmp="tag" class="today"><span class="es">Seguridad y responsabilidad</span><span class="en">Safety &amp; liability</span></span>
-      <p>
-        <span class="es"><strong>El SIS nunca se toca.</strong> SimPlant influye; el Sistema Instrumentado de Seguridad sigue siendo una red de seguridad independiente. Camino de confianza: recomendación → asesoría supervisada → control restringido — la confianza del operador se gana antes de cualquier autonomía.</span>
-        <span class="en"><strong>The SIS is never touched.</strong> SimPlant influences; the Safety Instrumented System remains an independent safety net. Trust path: recommendation → supervised advisory → constrained control — operator confidence earned before any autonomy.</span>
-      </p>
-    </div>
-    <div class="rulegrid cols2 rv" data-cmp="states" style="--i:3">
-      <div>
-        <span data-cmp="tag" class="today"><span class="es">Construido y operativo</span><span class="en">Built &amp; operational</span></span>
-        <h3><span class="es">Plataforma SimPlant, gemelo digital y prototipo de política validado.</span><span class="en">SimPlant platform, digital twin, and validated policy prototype.</span></h3>
-        <p style="margin-top:8px"><span class="es">Paquete de evidencia: corridas controladas, log de seguridad, métricas de emisiones y recuperación de gas — todo en simulación.</span><span class="en">Evidence package: controlled runs, safety log, emissions and gas-recovery metrics — all in simulation.</span></p>
-      </div>
-      <div>
-        <span data-cmp="tag" class="dev"><span class="es">Diseñado, aún no construido</span><span class="en">Designed, not yet built</span></span>
-        <h3><span class="es">Modo sombra e integración con planta real.</span><span class="en">Shadow mode and live-plant integration.</span></h3>
-        <p style="margin-top:8px"><span class="es">Próximo hito: datos históricos reales, recomendaciones en sombra, gateway OT y flujo de aceptación del operador.</span><span class="en">Next milestone: real historical data, shadow recommendations, OT gateway, and operator acceptance workflow.</span></p>
+  <div class="mid">
+    <div class="kicker rv" style="--i:0">SimPlant</div>
+    <p class="sent rv" style="--i:1">
+      <span class="es">Una IA que maneja la llama sola — <em>siempre dentro de las reglas de seguridad</em>.</span>
+      <span class="en">An AI that runs the flare on its own — <em>always inside the safety rules</em>.</span>
+    </p>
+    <div class="cage rv" style="--i:2">
+      <div class="cagelabel"><span class="es">Reglas de seguridad</span><span class="en">Safety rules</span></div>
+      <div class="flow">
+        <div class="node"><span class="es">MIRA</span><span class="en">WATCH</span></div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="node"><span class="es">PIENSA</span><span class="en">THINK</span></div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="node hot"><span class="es">ACTÚA</span><span class="en">ACT</span></div>
       </div>
     </div>
   </div>
-  <footer data-cmp="foot">
-    <div>
-      <span class="es">Historia simple: sensores → gemelo → política segura → restricciones → recomendaciones / control</span>
-      <span class="en">Simple story: sensors → twin → safe policy → safety constraints → recommendations / control</span>
+  <footer class="bot">
+    <div class="note">
+      <span class="es">Aprende en una copia digital de la planta (gemelo) y corre en una computadora al lado de la planta. Si algo se sale de las reglas, no actúa.</span>
+      <span class="en">It learns on a digital copy of the plant (twin) and runs on a computer next to the plant. If anything breaks the rules, it does not act.</span>
     </div>
-    <div class="num">05 / 15</div>
+    <div class="num">05 / 16</div>
   </footer>
 </section>
 
-<!-- ═══════════ 06 · ARQUITECTURA DE DESPLIEGUE ═══════════ -->
+<!-- ═══════════ 06 · SEGURIDAD: NO SE TOCA ═══════════
+     Concepto: el freno de emergencia queda intacto. Ancla: panel rojo. -->
 <section class="slide" id="s6">
-  <header data-cmp="topbar">
-    <div>BytesBricks<span style="color:var(--accent)">.</span></div>
-    <div class="chip"><span class="es">05 · Arquitectura de despliegue</span><span class="en">05 · Deployment architecture</span></div>
-    <div class="sect">Sim-to-real</div>
+  <header class="top">
+    <div class="brand">BytesBricks<b>.</b></div>
+    <div class="chip">SimPlant</div>
+    <div class="sect"><span class="es">Seguridad</span><span class="en">Safety</span></div>
   </header>
-  <div class="content">
-    <div class="head">
-      <h2 class="rv" data-cmp="title" style="--i:0">
-        <span class="es">Qué está construido, qué está diseñado y qué está validado <em>solo en simulación</em>.</span>
-        <span class="en">What is built, what is designed, and what is validated <em>only in simulation</em>.</span>
-      </h2>
-      <p class="sub rv" data-cmp="sub" style="--i:1">
-        <span class="es">Gemelo digital destilado de dos proyectos reales de ingeniería. No es un simulador académico.</span>
-        <span class="en">Digital twin distilled from two real engineering projects. Not an academic simulator.</span>
-      </p>
-    </div>
-    <div class="rulegrid cols3 rv" data-cmp="status" style="--i:2">
-      <div class="mod-tile">
-        <h2>SimPlant Trainer</h2>
-      </div>
-      <div class="mod-tile">
-        <h2>SimPlant Gateway</h2>
-      </div>
-      <div class="mod-tile">
-        <h2>SimPlant Runtime</h2>
-      </div>
-    </div>
-    <div class="grid2 rv" data-cmp="detail" style="--i:3">
-      <div class="stack">
-        <div data-cmp="claim">
-          <span data-cmp="tag" class="today"><span class="es">Calibración fundacional · foso de datos propietario</span><span class="en">Foundational calibration · proprietary data moat</span></span>
-          <p style="font-size:var(--t-small)">
-            <span class="es"><strong>#1 Refinería:</strong> modernización de antorcha — presión de colector, caudales, trade-offs gas/emisiones. <strong>#2 Puerto:</strong> antorcha integrada con requisitos completos de SIL, emisiones y HSE. Dos proyectos reales de ingeniería — no pilotos — usados para calibrar el gemelo. <strong>Son datos que otros no pueden comprar.</strong></span>
-            <span class="en"><strong>#1 Refinery:</strong> flare modernization — header pressure, flow rates, gas/emission trade-offs. <strong>#2 Port:</strong> integrated flare with full SIL, emissions, and HSE requirements. Two real engineering projects — not pilots — used to calibrate the twin. <strong>This is data others cannot buy.</strong></span>
-          </p>
-        </div>
-        <div>
-          <span data-cmp="tag" class="dev"><span class="es">Próximo hito técnico</span><span class="en">Next technical milestone</span></span>
-          <p style="font-size:var(--t-small)"><span class="es">Calibración grado HYSYS + datos históricos del design partner. Esperamos 20–30% de degradación sim-to-real; el modo sombra cierra esa brecha. La robustez OOD (ruido de sensores, transitorios no entrenados) es el hito técnico siguiente.</span><span class="en">HYSYS-grade calibration + design-partner historical data. We expect 20–30% sim-to-real degradation; shadow mode closes that gap. OOD robustness (sensor noise, untrained transients) is the following technical milestone.</span></p>
-        </div>
-      </div>
-      <div class="stack">
-        <div data-cmp="claim">
-          <span data-cmp="tag" class="sim lg"><span class="es">Validado solo en simulación</span><span class="en">Validated in simulation only</span></span>
-          <p style="font-size:var(--t-small)"><span class="es">Todas las métricas de desempeño de la slide 07 provienen del gemelo calibrado. <strong>Sin validación en planta real todavía.</strong></span><span class="en">All performance metrics on slide 07 come from the calibrated twin. <strong>No live-plant validation yet.</strong></span></p>
-        </div>
+  <div class="mid">
+    <div class="kicker rv" style="--i:0"><span class="es">La pregunta que todos hacen</span><span class="en">The question everyone asks</span></div>
+    <p class="sent rv" style="--i:1">
+      <span class="es">El freno de emergencia de la planta <em>queda intacto</em>.</span>
+      <span class="en">The plant's emergency brake <em>stays untouched</em>.</span>
+    </p>
+    <div class="claimpanel rv pop" style="--i:2">
+      <div class="huge"><span class="es">NO SE TOCA</span><span class="en">NEVER TOUCHED</span></div>
+      <div class="under">
+        <span class="es">La IA propone. El freno de la planta siempre manda.</span>
+        <span class="en">The AI proposes. The plant's brake always wins.</span>
       </div>
     </div>
   </div>
-  <footer data-cmp="foot">
-    <div>
-      <span class="es"><b>200 episodios de entrenamiento + 60 de despliegue · 0 violaciones del envolvente</b> · Ingeniería liderada por el founder</span>
-      <span class="en"><b>200 training + 60 deployment episodes · 0 safety-envelope violations</b> · Founder-led engineering</span>
+  <footer class="bot">
+    <div class="note">
+      <span class="es">El sistema instrumentado de seguridad (SIS) queda independiente, como manda la norma IEC 61511. SimPlant opera por fuera y por debajo de ese límite.</span>
+      <span class="en">The safety instrumented system (SIS) stays independent, as IEC 61511 requires. SimPlant operates outside and below that limit.</span>
     </div>
-    <div class="num">06 / 15</div>
+    <div class="num">06 / 16</div>
   </footer>
 </section>
 
-<!-- ═══════════ 07 · EVIDENCIA DE VALIDACIÓN ═══════════ -->
+<!-- ═══════════ 07 · LA PRUEBA: CERO FALLAS ═══════════
+     Concepto: probado y seguro (en simulador). Ancla: el 0 gigante. -->
 <section class="slide" id="s7">
-  <header data-cmp="topbar">
-    <div>BytesBricks<span style="color:var(--accent)">.</span></div>
-    <div class="chip"><span class="es">06 · Evidencia de validación</span><span class="en">06 · Validation evidence</span></div>
-    <div class="sect"><span class="es">Resultados</span><span class="en">Results</span></div>
+  <header class="top">
+    <div class="brand">BytesBricks<b>.</b></div>
+    <div class="chip">SimPlant</div>
+    <div class="sect"><span class="es">La prueba</span><span class="en">The proof</span></div>
   </header>
-  <div class="content">
-    <div class="head">
-      <h2 class="rv" data-cmp="title" style="--i:0">
-        <span class="es">La política mejora la economía de la antorcha <em>sin fallas de seguridad</em> en el gemelo.</span>
-        <span class="en">The policy improves flare economics <em>without safety failures</em> in the twin.</span>
-      </h2>
-      <p class="sub rv" data-cmp="sub" style="--i:1;font-size:var(--t-small)">
-        <span class="es">Métricas de simulación sobre un gemelo calibrado con dos proyectos reales de planta — todavía no son resultados de planta real. Etiquetado con transparencia para inversores.</span>
-        <span class="en">Simulation metrics on a twin calibrated from two real plant projects — not live-plant results yet. Labeled transparently for investors.</span>
-      </p>
+  <div class="mid center">
+    <div class="kicker rv" style="--i:0">
+      <span class="es">Probamos 260 veces</span><span class="en">We ran 260 tests</span>
+      <span class="tagchip amber"><span class="es">En simulador</span><span class="en">In simulator</span></span>
     </div>
-    <div class="grid2">
-      <div class="stack">
-        <div data-cmp="claim" class="rv" style="--i:2">
-          <p>
-            <span class="es"><strong>Valor modelado por sitio: ~US$1,0M/año</strong> — gas incremental recuperado: SimPlant recupera <strong>~231% más gas de antorcha</strong> que el controlador base (≈15.000 kg/día incrementales), valuado a un conservador <strong>~US$3,5/MMBtu</strong> (ancla Plan Gas.Ar / Henry Hub, mediados de 2026). Recuperación total del sistema ≈US$1,5M/año; neto de OPEX. <strong>La validación en sombra en planta es el próximo punto de prueba.</strong></span>
-            <span class="en"><strong>Modeled value per site: ~US$1.0M/yr</strong> — incremental recovered gas: SimPlant recovers <strong>~231% more flare gas</strong> than the baseline controller (≈15,000 kg/day incremental), valued at a conservative <strong>~US$3.5/MMBtu</strong> (Plan Gas.Ar / Henry Hub anchor, mid-2026). Total system recovery ≈US$1.5M/yr; net of system OPEX. <strong>Plant shadow validation is the next proof point.</strong></span>
-          </p>
-          <p class="fine">
-            <span class="es">Supuestos visibles: volumen incremental (~15.000 kg/día del gemelo) × precio conservador ~US$3,5/MMBtu · gas ≈ calidad metano (NHV de antorcha ~899 BTU/scf en sim) · neto de OPEX · solo simulación, no datos auditados de planta.</span>
-            <span class="en">Assumptions visible: incremental recovered-gas volume (~15,000 kg/day from the twin) × conservative gas price ~US$3.5/MMBtu · gas ≈ methane-quality (flare NHV ~899 BTU/scf in sim) · net of system OPEX · simulation only, not audited plant data.</span>
-          </p>
-        </div>
-        <p class="rv" style="--i:3;font-size:var(--t-tiny);color:#767676;line-height:1.45">
-          <span class="es"><strong style="color:var(--ink)">Emisiones (cumplimiento, no monetizado):</strong> en el gemelo la política reduce CO₂eq ~72% y limita la quema a ~10% del tiempo operativo. Brecha honesta: en esos intervalos, la eficiencia de combustión y el NHV caen debajo de los objetivos de 98% / 40 CFR 60.18 — próximo ítem de trabajo, separado del caso en dólares (sin precio de carbono en LATAM).</span>
-          <span class="en"><strong style="color:var(--ink)">Emissions (compliance, not monetized):</strong> in the twin the policy cuts CO₂eq ~72% and keeps flaring to ~10% of operating time. Honest gap: during those flaring intervals, combustion efficiency and flare NHV fall below the 98% / 40 CFR 60.18 targets — a known next-work item, kept separate from the dollar case (no carbon price in LATAM).</span>
-        </p>
-      </div>
-      <div class="stack">
-        <div class="rulegrid cols2 rv" data-cmp="stats" style="--i:2">
-          <div data-cmp="stat">
-            <b>0</b>
-            <span class="es"><strong>Violaciones del envolvente de seguridad</strong> en 200 + 60 episodios — valida la capa de restricciones duras (la IA nunca anula el SIS), <strong>no</strong> la robustez fuera de distribución.</span>
-            <span class="en"><strong>Safety-envelope violations</strong> across 200 + 60 episodes — validates the hard-constraint layer (the AI never overrides the SIS), <strong>not</strong> out-of-distribution robustness.</span>
-          </div>
-          <div data-cmp="stat">
-            <b>+231%</b>
-            <span class="es"><strong>Evidencia direccional solamente:</strong> mejora de recuperación de gas vs. baseline de control legado en el escenario simulado (requiere validación en sombra en planta).</span>
-            <span class="en"><strong>Directional evidence only:</strong> gas-recovery uplift vs. legacy-control baseline in the simulated scenario (requires plant shadow validation).</span>
-          </div>
-        </div>
-        <div class="rulegrid cols2 rv" data-cmp="notes" style="--i:3">
-          <div>
-            <span data-cmp="tag" class="today"><span class="es">Seguridad</span><span class="en">Safety</span></span>
-            <p style="font-size:var(--t-small)"><span class="es">El SIS nunca se toca. Camino de confianza: recomendación → asesoría supervisada → control restringido.</span><span class="en">The SIS is never touched. Trust path: recommendation → supervised advisory → constrained control.</span></p>
-          </div>
-          <div>
-            <span data-cmp="tag" class="dev"><span class="es">Próxima prueba</span><span class="en">Next proof point</span></span>
-            <p style="font-size:var(--t-small)"><span class="es">Cerrar la brecha sim-to-real con datos históricos, calibración HYSYS y recomendaciones en sombra medidas contra el baseline del operador.</span><span class="en">Close sim-to-real gap with historical data, HYSYS calibration, and shadow recommendations measured against operator baseline.</span></p>
-          </div>
-        </div>
-      </div>
+    <div class="giant g-center rv pop" style="--i:1">
+      <span class="gnum" style="font-size:430px;color:var(--accent)">0</span>
     </div>
+    <p class="sent rv" style="--i:2;font-size:76px">
+      <span class="es">Cero fallas de seguridad.</span>
+      <span class="en">Zero safety failures.</span>
+    </p>
   </div>
-  <footer data-cmp="foot">
-    <div><span class="es">Gemelo calibrado con dos proyectos reales de planta · sin datos de planta viva aún</span><span class="en">Twin calibrated from two real plant projects · no live-plant data yet</span></div>
-    <div class="num">07 / 15</div>
+  <footer class="bot">
+    <div class="note">
+      <span class="es">200 pruebas de entrenamiento + 60 de validación en un simulador calibrado con 2 proyectos reales de ingeniería. Todavía sin datos de planta real.</span>
+      <span class="en">200 training runs + 60 validation runs on a simulator calibrated with 2 real engineering projects. No live-plant data yet.</span>
+    </div>
+    <div class="num">07 / 16</div>
   </footer>
 </section>
 
-<!-- ═══════════ 08 · OBJETIVOS Y CAMINO DE ENTRADA ═══════════ -->
+<!-- ═══════════ 08 · LA PRUEBA: 3× MÁS GAS ═══════════
+     Concepto: recupera mucho más gas. Ancla: 3× + barras. -->
+<section class="slide" id="s8">
+  <header class="top">
+    <div class="brand">BytesBricks<b>.</b></div>
+    <div class="chip">SimPlant</div>
+    <div class="sect"><span class="es">La prueba</span><span class="en">The proof</span></div>
+  </header>
+  <div class="mid">
+    <div class="kicker rv" style="--i:0">
+      <span class="es">Y no solo es segura</span><span class="en">And it's not just safe</span>
+      <span class="tagchip amber"><span class="es">En simulador</span><span class="en">In simulator</span></span>
+    </div>
+    <p class="sent rv" style="--i:1">
+      <span class="es">Recupera <em>3 veces más gas</em> que el control de hoy.</span>
+      <span class="en">It recovers <em>3× more gas</em> than today's control.</span>
+    </p>
+    <div class="bars rv" style="--i:2;margin-top:20px">
+      <div class="row">
+        <div class="lbl"><span class="es">Hoy</span><span class="en">Today</span></div>
+        <div class="track"><div class="fill today"></div></div>
+      </div>
+      <div class="row">
+        <div class="lbl" style="color:var(--accent)">SimPlant</div>
+        <div class="track"><div class="fill ours"><b>3×</b></div></div>
+      </div>
+    </div>
+    <div class="rv" style="--i:3;margin-top:14px">
+      <span class="tagchip"><span class="es">Bonus: −72% de CO₂</span><span class="en">Bonus: −72% CO₂</span></span>
+    </div>
+  </div>
+  <footer class="bot">
+    <div class="note">
+      <span class="es">+231% de gas recuperado vs. control clásico y −72% de CO₂e — resultados de simulación, todavía sin planta real.</span>
+      <span class="en">+231% recovered gas vs. classic control and −72% CO₂e — simulation results, no live plant yet.</span>
+    </div>
+    <div class="num">08 / 16</div>
+  </footer>
+</section>
+
+<!-- ═══════════ 09 · EL VALOR ═══════════
+     Concepto: cuánta plata devuelve. Ancla: US$1.000.000. -->
 <section class="slide" id="s9">
-  <header data-cmp="topbar">
-    <div>BytesBricks<span style="color:var(--accent)">.</span></div>
-    <div class="chip"><span class="es">07 · Objetivos de entrada</span><span class="en">07 · Targets &amp; entry path</span></div>
-    <div class="sect">Go-to-market</div>
+  <header class="top">
+    <div class="brand">BytesBricks<b>.</b></div>
+    <div class="chip">SimPlant</div>
+    <div class="sect"><span class="es">El valor</span><span class="en">The value</span></div>
   </header>
-  <div class="content">
-    <h2 class="rv" data-cmp="title" style="--i:0">
-      <span class="es">Objetivos con <em>puerta de entrada definida</em> — sin relaciones firmadas, sin logos inflados.</span>
-      <span class="en">Targets with a <em>defined entry path</em> — no signed relationships, no inflated logos.</span>
-    </h2>
-    <div class="rulegrid split rv" data-cmp="targets" style="--i:1">
-      <div>
-        <span data-cmp="tag" class="prospect"><span class="es">Beachhead primario — YPF</span><span class="en">Primary beachhead — YPF</span></span>
-        <p>
-          <span class="es"><strong>NOC integrada</strong>, ~57% del crudo refinado en Argentina, gran CAPEX, presión ESG + digitalización.<br><strong>Puerta de entrada: Y-TEC</strong> (brazo de I+D de YPF, 51% YPF / 49% CONICET) — alineado en control de procesos, eficiencia energética y plantas piloto. Acceso vía convocatorias abiertas de Y-TEC y el canal académico/CONICET (universidad del founder + red CACHE), apuntando a una colaboración de I+D de bajo riesgo. <strong>Puerta sancionada — no venta fría.</strong> El hackathon de innovación de YPF vuelve en 2027 como puerta secundaria.</span>
-          <span class="en"><strong>Integrated NOC</strong>, ~57% of refined crude in Argentina, large CAPEX, ESG + digitalization pressure.<br><strong>Entry path: Y-TEC</strong> (YPF's R&amp;D arm, 51% YPF / 49% CONICET) — domain-aligned in process control, energy efficiency, and pilot plants. Access via Y-TEC open calls and the academic/CONICET channel (founder's university + CACHE network), targeting a low-risk R&amp;D collaboration. <strong>Sanctioned door — not cold sales.</strong> The YPF innovation hackathon returns in 2027 as a secondary door.</span>
-        </p>
-      </div>
-      <div class="stack" style="gap:0">
-        <div style="border-bottom:1.5px solid var(--line);padding-bottom:clamp(8px,1.4vh,14px)">
-          <span data-cmp="tag" class="prospect">Pan American Energy — Campana</span>
-          <p style="font-size:var(--t-small)"><span class="es">La refinería más moderna de la región, expansión reciente, foco en eficiencia + HSE, cultura de pilotos. <strong>Entrada:</strong> cuña + inbound + intro del advisor; comprador más ágil que una NOC pura.</span><span class="en">Region's most modern refinery, recent expansion, efficiency + HSE focus, pilot culture. <strong>Entry:</strong> wedge + inbound + advisor intro; faster-moving buyer than a pure NOC.</span></p>
-        </div>
-        <div style="border-bottom:1.5px solid var(--line);padding:clamp(8px,1.4vh,14px) 0">
-          <span data-cmp="tag" class="prospect">Petrobras</span>
-          <p style="font-size:var(--t-small)"><span class="es">NOC grande, cultura de medición de metano, presión regulatoria, escala. <strong>Entrada:</strong> credibilidad acumulada (CACHE, advisor, inbound) + canales institucionales. Más fría; expansión de año 2.</span><span class="en">Large NOC, methane-measurement culture, regulatory pressure, scale. <strong>Entry:</strong> accumulated credibility (CACHE, advisor, inbound) + institutional channels. Colder; year-2 expansion.</span></p>
-        </div>
-        <div style="padding-top:clamp(8px,1.4vh,14px)">
-          <span data-cmp="tag" class="vision"><span class="es">Corea — mercado global</span><span class="en">Korea — global market</span></span>
-          <p style="font-size:var(--t-small)"><span class="es">Uno de los clusters de refinación más grandes del mundo (Ulsan, Yeosu — SK, GS, S-Oil, HD Hyundai Oilbank). Refleja ambición global y TAM. <strong>Entrada:</strong> habilitada por el Fast Track remoto de Antler + red de aceleradoras.</span><span class="en">One of the world's largest refining clusters (Ulsan, Yeosu — SK, GS, S-Oil, HD Hyundai Oilbank). Reflects global ambition and TAM. <strong>Entry:</strong> enabled by Antler's remote Fast Track + accelerator network.</span></p>
-        </div>
-      </div>
+  <div class="mid center">
+    <div class="kicker rv" style="--i:0">
+      <span class="es">¿Cuánto vale eso?</span><span class="en">What is that worth?</span>
+      <span class="tagchip amber"><span class="es">Estimado en simulador</span><span class="en">Simulator estimate</span></span>
     </div>
+    <div class="giant g-center rv pop" style="--i:1">
+      <span class="es"><span class="gnum" style="font-size:230px">US$ 1.000.000</span></span>
+      <span class="en"><span class="gnum" style="font-size:230px">US$ 1,000,000</span></span>
+      <span class="gword" style="font-size:74px"><span class="es">POR AÑO · POR REFINERÍA</span><span class="en">PER YEAR · PER REFINERY</span></span>
+    </div>
+    <div class="hazardbar rv" style="--i:2"></div>
+    <p class="sent rv" style="--i:3;font-size:54px">
+      <span class="es">Plata que hoy se quema — y vuelve al negocio.</span>
+      <span class="en">Money that burns today — back into the business.</span>
+    </p>
   </div>
-  <footer data-cmp="foot">
-    <div><span class="es">Cada objetivo tiene una puerta definida · NOC-first, por canales sancionados</span><span class="en">Each target has a defined entry path · NOC-first, through sanctioned channels</span></div>
-    <div class="num">08 / 15</div>
+  <footer class="bot">
+    <div class="note">
+      <span class="es">≈15.000 kg de gas por día recuperados × US$3,5 por MMBtu (precio conservador), neto de costos. Estimado en simulación.</span>
+      <span class="en">≈15,000 kg of gas per day recovered × US$3.5 per MMBtu (conservative price), net of costs. Simulation estimate.</span>
+    </div>
+    <div class="num">09 / 16</div>
   </footer>
 </section>
 
-<!-- ═══════════ 10 · PRIMER PILOTO ═══════════ -->
+<!-- ═══════════ 10 · NUESTRO MERCADO: 25 REFINERÍAS ═══════════
+     Concepto: por dónde empezamos. Ancla: 25 + grilla 5×5. -->
 <section class="slide" id="s10">
-  <header data-cmp="topbar">
-    <div>BytesBricks<span style="color:var(--accent)">.</span></div>
-    <div class="chip"><span class="es">08 · Primer piloto</span><span class="en">08 · First pilot plan</span></div>
-    <div class="sect"><span class="es">Despliegue</span><span class="en">Deployment</span></div>
+  <header class="top">
+    <div class="brand">BytesBricks<b>.</b></div>
+    <div class="chip">SimPlant</div>
+    <div class="sect"><span class="es">Nuestro mercado</span><span class="en">Our market</span></div>
   </header>
-  <div class="content">
-    <div class="head">
-      <h2 class="rv" data-cmp="title" style="--i:0">
-        <span class="es">De la validación simulada a la referencia industrial — <em>un plan de piloto honesto</em>.</span>
-        <span class="en">From simulated validation to industrial reference — <em>one honest pilot plan</em>.</span>
-      </h2>
-      <p class="sub rv" data-cmp="sub" style="--i:1">
-        <span class="es"><strong>Pilotos completados a la fecha: 0 — este es el hito que financia la ronda.</strong></span>
-        <span class="en"><strong>Pilots completed to date: 0 — this is the milestone the raise funds.</strong></span>
-      </p>
-    </div>
-    <div class="rulegrid split rv" data-cmp="pilot" style="--i:2">
-      <div>
-        <span data-cmp="tag" class="dev"><span class="es">Primer piloto — estructura (modo sombra)</span><span class="en">First pilot — structure (shadow mode)</span></span>
-        <h3><span class="es">Modo sombra en refinería ancla de LATAM</span><span class="en">Shadow mode at anchor LATAM refinery</span></h3>
-        <p style="margin-top:8px"><span class="es"><strong>Alcance:</strong> acceso a datos OT, calibración grado HYSYS, instalación de gateway edge, ingesta en tiempo real <strong>sin control en lazo cerrado</strong>.</span><span class="en"><strong>Scope:</strong> OT data access, HYSYS-grade calibration, edge gateway install, real-time ingestion <strong>without closed-loop control</strong>.</span></p>
-        <p style="margin-top:6px"><span class="es"><strong>KPI único:</strong> reducción del tiempo de antorcha activa vs. baseline del operador (auto-reportado; la medición independiente es el paso siguiente). KPI elegido por ser una variable que la política demuestra controlar.</span><span class="en"><strong>Single KPI:</strong> reduction in active flare time vs. operator baseline (self-reported; independent measurement is the following step). KPI chosen to be a variable the policy demonstrably controls.</span></p>
-        <p style="margin-top:6px"><span class="es"><strong>Ticket:</strong> US$100K–300K, pago. <strong>Duración:</strong> 12–16 semanas post-acceso a datos.</span><span class="en"><strong>Ticket:</strong> US$100K–300K, paid. <strong>Duration:</strong> 12–16 weeks post-data-access.</span></p>
+  <div class="mid">
+    <div class="rowsplit">
+      <div class="grow">
+        <div class="kicker rv" style="--i:0"><span class="es">Por dónde empezamos</span><span class="en">Where we start</span></div>
+        <p class="sent rv" style="--i:1;margin-top:26px">
+          <span class="es">Empezamos con <em>25 refinerías</em> en América Latina.</span>
+          <span class="en">We start with <em>25 refineries</em> in Latin America.</span>
+        </p>
+        <div class="giant rv pop" style="--i:2;margin-top:40px">
+          <span class="gnum" style="font-size:300px">25</span>
+          <span class="gword" style="font-size:80px"><span class="es">REFINERÍAS CON ANTORCHA</span><span class="en">REFINERIES WITH A FLARE</span></span>
+        </div>
       </div>
-      <div>
-        <span data-cmp="tag" class="today"><span class="es">Cómo se gana la confianza del operador</span><span class="en">How a cautious operator gets comfortable</span></span>
-        <p><span class="es">El piloto se gana río abajo de la relación — no en frío. De-riesgamos el lado del operador: el SIS nunca se toca; primero solo-sombra; un único KPI medible; un ticket chico.</span><span class="en">The pilot is earned downstream of the relationship — not cold. We de-risk the operator's side: the SIS is never touched; shadow-only first; a single measurable KPI; a small ticket.</span></p>
-        <p style="margin-top:8px"><span class="es"><strong>Secuencia:</strong> relación (vía cuña/canal) → análisis/backtest gratuito o de bajo costo sobre sus datos → piloto sombra pago → asesoría supervisada → control restringido.</span><span class="en"><strong>Sequence:</strong> relationship (via wedge/channel) → free or low-cost analysis/backtest on their data → paid shadow pilot → supervised advisory → constrained control.</span></p>
-      </div>
-    </div>
-    <div class="rulegrid cols4 rv" data-cmp="timeline" style="--i:3">
-      <div>
-        <span data-cmp="tag" class="dev">Q4 2026</span>
-        <h3><span class="es">Design partner + LOI</span><span class="en">Design partner + LOI</span></h3>
-        <p style="margin-top:6px;font-size:var(--t-small)"><span class="es">1 design partner con datos, KPI y sponsor ejecutivo.</span><span class="en">1 design partner with data, KPI, and executive sponsor.</span></p>
-      </div>
-      <div>
-        <span data-cmp="tag" class="dev">Q1 2027</span>
-        <h3><span class="es">Kickoff de piloto pago</span><span class="en">Paid pilot kickoff</span></h3>
-        <p style="margin-top:6px;font-size:var(--t-small)"><span class="es">PoC con fee pago; aprobación HSE.</span><span class="en">PoC with paid fee; HSE approval.</span></p>
-      </div>
-      <div>
-        <span data-cmp="tag" class="dev">Q2 2027</span>
-        <h3><span class="es">Modo sombra</span><span class="en">Shadow mode</span></h3>
-        <p style="margin-top:6px;font-size:var(--t-small)"><span class="es">Recomendaciones medidas vs. baseline; ingesta OT en vivo.</span><span class="en">Recommendations measured vs. baseline; live OT ingestion.</span></p>
-      </div>
-      <div>
-        <span data-cmp="tag" class="vision">2027+</span>
-        <h3><span class="es">Asesoría → SaaS</span><span class="en">Advisory → SaaS</span></h3>
-        <p style="margin-top:6px;font-size:var(--t-small)"><span class="es">ROI documentado → contrato recurrente US$200K–800K ARR.</span><span class="en">Documented ROI → recurring contract US$200K–800K ARR.</span></p>
-      </div>
+      <!-- 25 cuadrados = 25 refinerías objetivo (los genera JS) -->
+      <div class="sqgrid rv" style="--i:1;grid-template-columns:repeat(5,88px);grid-auto-rows:88px;gap:18px"
+           data-squares="25" data-hot="3" aria-hidden="true"></div>
     </div>
   </div>
-  <footer data-cmp="foot">
-    <div><span class="es"><b>Camino:</b> evaluación paga → sombra → asesoría supervisada → control autónomo restringido</span><span class="en"><b>Path:</b> paid evaluation → shadow → supervised advisory → constrained autonomous control</span></div>
-    <div class="num">09 / 15</div>
+  <footer class="bot">
+    <div class="note">
+      <span class="es">Mercado alcanzable estimado: US$25–200 millones (calculado de abajo hacia arriba). El mundo tiene ~700 refinerías: LATAM es solo la primera etapa.</span>
+      <span class="en">Estimated obtainable market: US$25–200 million (bottoms-up). The world has ~700 refineries: LATAM is just stage one.</span>
+    </div>
+    <div class="num">10 / 16</div>
   </footer>
 </section>
 
-<!-- ═══════════ 11 · MODELO ECONÓMICO ═══════════ -->
+<!-- ═══════════ 11 · PRIMEROS OBJETIVOS ═══════════
+     Concepto: puertas de entrada definidas. Ancla: 3 nombres enormes. -->
 <section class="slide" id="s11">
-  <header data-cmp="topbar">
-    <div>BytesBricks<span style="color:var(--accent)">.</span></div>
-    <div class="chip"><span class="es">09 · Modelo económico</span><span class="en">09 · Economic model</span></div>
-    <div class="sect"><span class="es">Negocio</span><span class="en">Business</span></div>
+  <header class="top">
+    <div class="brand">BytesBricks<b>.</b></div>
+    <div class="chip">SimPlant</div>
+    <div class="sect"><span class="es">Primeros objetivos</span><span class="en">First targets</span></div>
   </header>
-  <div class="content">
-    <h2 class="rv" data-cmp="title" style="--i:0">
-      <span class="es">Empezamos con despliegue pago. Escalamos a <em>software de control recurrente</em> de alto margen.</span>
-      <span class="en">We start with paid deployment. We scale to high-margin <em>recurring control software</em>.</span>
-    </h2>
-    <div class="rulegrid cols4 rv" data-cmp="pricing" style="--i:1">
-      <div>
-        <span data-cmp="tag" class="sim"><span class="es">Piloto / Sombra</span><span class="en">Pilot / Shadow</span></span>
-        <h3>US$100K–300K</h3>
-        <p style="margin-top:6px;font-size:var(--t-small)"><span class="es">Entrada de baja fricción. Cubre gateway, calibración del gemelo y validación en sombra antes del lazo cerrado.</span><span class="en">Low-friction entry. Covers gateway, twin calibration, and shadow validation before closed-loop.</span></p>
+  <div class="mid">
+    <div class="kicker rv" style="--i:0"><span class="es">Nombres y apellido</span><span class="en">Names on the list</span></div>
+    <p class="sent rv" style="--i:1">
+      <span class="es">Ya sabemos <em>por qué puerta entrar</em>.</span>
+      <span class="en">We already know <em>which doors to knock on</em>.</span>
+    </p>
+    <div class="targets rv" style="--i:2">
+      <div class="trow first">
+        <div class="tname">YPF</div>
+        <div class="tdoor"><span class="es">Puerta: <b>Y-TEC</b> · su brazo de investigación</span><span class="en">Door: <b>Y-TEC</b> · its R&amp;D arm</span></div>
       </div>
-      <div>
-        <span data-cmp="tag" class="sim">Setup</span>
-        <h3>US$0,4M–2M</h3>
-        <p style="margin-top:6px;font-size:var(--t-small)"><span class="es">Gemelo por sitio, integración OT, calibración de datos, workflow HSE. Intensivo en servicios, estratégico.</span><span class="en">Per-site twin, OT integration, data calibration, HSE workflow. Service-heavy, strategic.</span></p>
+      <div class="trow">
+        <div class="tname" style="font-size:72px">PAN AMERICAN ENERGY</div>
+        <div class="tdoor"><span class="es">La refinería más moderna de la región</span><span class="en">The region's most modern refinery</span></div>
       </div>
-      <div>
-        <span data-cmp="tag" class="sim"><span class="es">Recurrente</span><span class="en">Recurring</span></span>
-        <h3>US$200K–800K ARR</h3>
-        <p style="margin-top:6px;font-size:var(--t-small)"><span class="es">Software de optimización, monitoreo, actualizaciones de política, gobernanza de modelos y soporte.</span><span class="en">Optimization software, monitoring, policy updates, model governance, and support.</span></p>
-      </div>
-      <div>
-        <span data-cmp="tag" class="vision"><span class="es">Expansión</span><span class="en">Expansion</span></span>
-        <h3><span class="es">Antorcha → off-gas → APC</span><span class="en">Flare → off-gas → APC</span></h3>
-        <p style="margin-top:6px;font-size:var(--t-small)"><span class="es">Aterrizar en la cuña crítica de seguridad; expandir a unidades adyacentes y sitios corporativos.</span><span class="en">Land on safety-critical wedge; expand to adjacent units and corporate sites.</span></p>
-      </div>
-    </div>
-    <div class="rulegrid cols2 rv" data-cmp="notes" style="--i:2">
-      <div>
-        <span data-cmp="tag" class="today"><span class="es">Valor modelado por sitio</span><span class="en">Modeled value per site</span></span>
-        <p><span class="es"><strong>~US$1,0M/año incremental</strong> (derivado de simulación: ~15.000 kg/día recuperados × ~US$3,5/MMBtu; recuperación total del sistema ~US$1,5M) · payback a confirmar vs. costo del sistema · el rango depende del tamaño de planta y el precio del gas.</span><span class="en"><strong>~US$1.0M/yr incremental</strong> (simulation-derived: ~15,000 kg/day recovered × ~US$3.5/MMBtu; total system recovery ~US$1.5M) · payback to confirm vs. system cost · range driven by plant size and gas price.</span></p>
-      </div>
-      <div>
-        <span data-cmp="tag" class="sim"><span class="es">Producto vs. servicios</span><span class="en">Product vs. services</span></span>
-        <p><span class="es"><strong>Reutilizable entre sitios (producto):</strong> toolkit de restricciones, framework de políticas, playbook de aceptación.<br><strong>Reconstruido por sitio (servicios):</strong> calibración del gemelo e integración OT específicas. El margen se compone a medida que crece la capa reutilizable.</span><span class="en"><strong>Reused across sites (product):</strong> constraint toolkit, policy framework, acceptance playbook.<br><strong>Rebuilt per site (services):</strong> site-specific twin calibration and OT integration. Margin compounds as the reusable layer grows.</span></p>
+      <div class="trow">
+        <div class="tname">PETROBRAS</div>
+        <div class="tdoor"><span class="es">Escala regional · etapa dos</span><span class="en">Regional scale · stage two</span></div>
       </div>
     </div>
   </div>
-  <footer data-cmp="foot">
-    <div><span class="es">SimPlant · Autonomía restringida</span><span class="en">SimPlant · Restricted autonomy</span></div>
-    <div class="num">10 / 15</div>
+  <footer class="bot">
+    <div class="note">
+      <span class="es">Objetivos — todavía sin contratos firmados. Y-TEC: 51% YPF / 49% CONICET, con convocatorias abiertas a startups y universidades.</span>
+      <span class="en">Targets — no signed contracts yet. Y-TEC: 51% YPF / 49% CONICET, with open calls for startups and universities.</span>
+    </div>
+    <div class="num">11 / 16</div>
   </footer>
 </section>
 
-<!-- ═══════════ 12 · GO-TO-MARKET ═══════════ -->
+<!-- ═══════════ 12 · EL PLAN: LOS PRÓXIMOS 18 MESES ═══════════
+     Concepto: qué pasa con la plata, fecha por fecha (roadmap + piloto
+     fusionados). Ancla: línea de tiempo con 4 estaciones. -->
+<section class="slide" id="s12">
+  <header class="top">
+    <div class="brand">BytesBricks<b>.</b></div>
+    <div class="chip">SimPlant</div>
+    <div class="sect"><span class="es">El plan</span><span class="en">The plan</span></div>
+  </header>
+  <div class="mid">
+    <div class="kicker rv" style="--i:0"><span class="es">Si levantamos la ronda</span><span class="en">If we raise the round</span></div>
+    <p class="sent rv" style="--i:1">
+      <span class="es">En <em>18 meses</em>, la IA pasa del simulador a una <em>refinería real</em>.</span>
+      <span class="en">In <em>18 months</em>, the AI goes from the simulator to a <em>real refinery</em>.</span>
+    </p>
+    <div class="tl" style="margin-top:20px">
+      <div class="st done rv" style="--i:2">
+        <div class="d"><span class="es">HOY</span><span class="en">TODAY</span></div>
+        <div class="nd"><i class="sq"></i></div>
+        <div class="lb"><span class="es"><b>Funciona</b> en el simulador</span><span class="en"><b>Works</b> in the simulator</span></div>
+      </div>
+      <div class="st rv" style="--i:3">
+        <div class="d"><span class="es">FIN 2026</span><span class="en">END 2026</span></div>
+        <div class="nd"><i class="sq"></i></div>
+        <div class="lb"><span class="es">Primer <b>cliente de prueba</b> firmado</span><span class="en">First <b>test customer</b> signed</span></div>
+      </div>
+      <div class="st rv" style="--i:4">
+        <div class="d">2027</div>
+        <div class="nd"><i class="sq"></i></div>
+        <div class="lb"><span class="es"><b>Prueba paga</b> en refinería real: la IA mira y aconseja</span><span class="en"><b>Paid test</b> at a real refinery: the AI watches and advises</span></div>
+      </div>
+      <div class="st goal rv" style="--i:5">
+        <div class="d"><span class="es">FIN 2027</span><span class="en">END 2027</span></div>
+        <div class="nd"><i class="sq"></i></div>
+        <div class="lb"><span class="es">Resultados medidos: <b>lista para vender</b></span><span class="en">Measured results: <b>ready to sell</b></span></div>
+      </div>
+    </div>
+  </div>
+  <footer class="bot">
+    <div class="note">
+      <span class="es">Pruebas en planta real hechas hasta hoy: 0 — ese es el hito que financia la ronda. En la prueba paga la IA todavía no maneja nada; manejar sola, con límites, llega en 2028.</span>
+      <span class="en">Real-plant tests completed so far: 0 — that is the milestone this raise funds. During the paid test the AI drives nothing yet; driving alone, within limits, comes in 2028.</span>
+    </div>
+    <div class="num">12 / 16</div>
+  </footer>
+</section>
+
+<!-- ═══════════ 13 · EL NEGOCIO ═══════════
+     Concepto: cómo cobramos. Ancla: 2 números gemelos. -->
 <section class="slide" id="s13">
-  <header data-cmp="topbar">
-    <div>BytesBricks<span style="color:var(--accent)">.</span></div>
-    <div class="chip"><span class="es">10 · Go-to-market</span><span class="en">10 · Go-to-Market</span></div>
-    <div class="sect"><span class="es">Distribución</span><span class="en">Distribution</span></div>
+  <header class="top">
+    <div class="brand">BytesBricks<b>.</b></div>
+    <div class="chip">SimPlant</div>
+    <div class="sect"><span class="es">El negocio</span><span class="en">The business</span></div>
   </header>
-  <div class="content">
-    <h2 class="rv" data-cmp="title" style="--i:0">
-      <span class="es">Vendemos por riesgo operativo y ahorro medible — <em>no por entusiasmo con la IA</em>.</span>
-      <span class="en">We sell on operational risk and measurable savings — <em>not AI enthusiasm</em>.</span>
-    </h2>
-    <div class="grid2 rows-tight rv" data-cmp="gtmrows" style="--i:1">
-      <div>
-        <div data-cmp="row">
-          <strong>ICP</strong>
-          <p><span class="es">Refinerías downstream de LATAM, 100K–500K bpd, presión por metano, presupuestos de modernización, operadores concentrados.</span><span class="en">LATAM downstream refineries, 100K–500K bpd, methane pressure, modernization budgets, concentrated operators.</span></p>
-        </div>
-        <div data-cmp="row">
-          <strong><span class="es">Mapa de compra</span><span class="en">Buyer map</span></strong>
-          <p><span class="es">Sponsor económico: VP Ops / CFO. Sponsor técnico: Ingeniería de Procesos. Gatekeepers: HSE y Seguridad OT.</span><span class="en">Economic sponsor: VP Ops / CFO. Technical sponsor: Process Engineering. Gatekeepers: HSE &amp; OT Security.</span></p>
-        </div>
-        <div data-cmp="row">
-          <strong><span class="es">Cuña</span><span class="en">Wedge</span></strong>
-          <p><span class="es">Herramienta de simulación comunitaria → análisis/backtest gratuito → piloto sombra pago → asesoría supervisada → control restringido.</span><span class="en">Community simulation tool → free analysis/backtest → paid shadow pilot → supervised advisory → constrained control.</span></p>
-        </div>
+  <div class="mid">
+    <div class="kicker rv" style="--i:0"><span class="es">Cómo ganamos plata</span><span class="en">How we make money</span></div>
+    <p class="sent rv" style="--i:1">
+      <span class="es">La primera prueba se cobra. Después, <em>suscripción todos los años</em>.</span>
+      <span class="en">The first test is paid. Then, <em>a subscription every year</em>.</span>
+    </p>
+    <div class="twins rv" style="--i:2">
+      <div class="panel dim">
+        <div class="pnum">US$ 100–300<span style="font-size:64px"> K</span></div>
+        <div class="plbl"><span class="es">La primera prueba</span><span class="en">The first test</span></div>
+        <div class="psub"><span class="es">Una vez · ~4 meses · en una refinería real</span><span class="en">One time · ~4 months · at a real refinery</span></div>
       </div>
-      <div>
-        <div data-cmp="row">
-          <strong><span class="es">Ciclo de venta</span><span class="en">Sales cycle</span></strong>
-          <p><span class="es">3–6 meses de discovery y acceso a datos · 6 meses de piloto pago · 6 meses de sombra/asesoría · expansión multi-sitio.</span><span class="en">3–6 months discovery and data access · 6 months paid pilot · 6 months shadow/advisory · multi-site expansion.</span></p>
-        </div>
-        <div data-cmp="row">
-          <strong><span class="es">Canales</span><span class="en">Channels</span></strong>
-          <p><span class="es">Cuña comunitaria + canales sancionados primero (brazos de I+D como Y-TEC, desafíos de innovación abierta, aceleradora, CACHE); integradores y EPCs después del playbook repetible.</span><span class="en">Community wedge + sanctioned channels first (corporate R&amp;D arms like Y-TEC, open-innovation challenges, accelerator, CACHE); integrators and EPCs after repeatable playbook.</span></p>
-        </div>
-        <div data-cmp="row">
-          <strong><span class="es">Tracción cercana</span><span class="en">Near-term traction</span></strong>
-          <p><span class="es">Recepción en CACHE + inbound de GitHub · lanzamiento de la herramienta de simulación · objetivo de LOI Q4 2026 · kickoff del primer piloto sombra pago Q1 2027.</span><span class="en">CACHE reception + GitHub inbound · simulation tool launch · LOI target Q4 2026 · first paid shadow pilot kickoff Q1 2027.</span></p>
-        </div>
+      <div class="panel red">
+        <div class="pnum">US$ 200–800<span style="font-size:64px"> K</span></div>
+        <div class="plbl"><span class="es">Por año, por refinería</span><span class="en">Per year, per refinery</span></div>
+        <div class="psub"><span class="es">Suscripción: software, mejoras y soporte</span><span class="en">Subscription: software, updates &amp; support</span></div>
       </div>
     </div>
   </div>
-  <footer data-cmp="foot">
-    <div><span class="es">SimPlant · Autonomía restringida</span><span class="en">SimPlant · Restricted autonomy</span></div>
-    <div class="num">11 / 15</div>
+  <footer class="bot">
+    <div class="note">
+      <span class="es">El software se repite entre plantas; la integración se hace una sola vez por planta. Por eso el margen crece con cada refinería.</span>
+      <span class="en">The software repeats across plants; integration happens once per plant. That's why margin grows with every refinery.</span>
+    </div>
+    <div class="num">13 / 16</div>
   </footer>
 </section>
 
-<!-- ═══════════ 14 · ROADMAP ═══════════ -->
+<!-- ═══════════ 14 · EL EQUIPO ═══════════
+     Concepto: refinería + IA en la misma mesa. Ancla: 28 años. -->
 <section class="slide" id="s14">
-  <header data-cmp="topbar">
-    <div>BytesBricks<span style="color:var(--accent)">.</span></div>
-    <div class="chip">11 · Roadmap</div>
-    <div class="sect">De-risking</div>
+  <header class="top">
+    <div class="brand">BytesBricks<b>.</b></div>
+    <div class="chip">SimPlant</div>
+    <div class="sect"><span class="es">El equipo</span><span class="en">The team</span></div>
   </header>
-  <div class="content">
-    <h2 class="rv" data-cmp="title" style="--i:0">
-      <span class="es">Secuencia de de-riesgo: prueba técnica → prueba en planta → <em>repetibilidad comercial</em>.</span>
-      <span class="en">De-risking sequence: technical proof → plant proof → <em>commercial repeatability</em>.</span>
-    </h2>
-    <div class="rulegrid cols4 rv" data-cmp="timeline" style="--i:1">
-      <div>
-        <span data-cmp="tag" class="today"><span class="es">Hoy · mediados de 2026</span><span class="en">Today · mid-2026</span></span>
-        <h3><span class="es">Prueba en gemelo</span><span class="en">Twin proof</span></h3>
-        <p style="margin-top:6px"><span class="es">Prototipo de política, métricas de simulación, envolvente de seguridad definido, calibración fundacional de 2 proyectos reales.</span><span class="en">Policy prototype, simulation metrics, safety envelope defined, foundational calibration from 2 real projects.</span></p>
+  <div class="mid">
+    <div class="kicker rv" style="--i:0"><span class="es">Quiénes somos</span><span class="en">Who we are</span></div>
+    <p class="sent rv" style="--i:1">
+      <span class="es"><em>28 años de refinerías</em> + el ingeniero que construyó la IA.</span>
+      <span class="en"><em>28 years inside refineries</em> + the engineer who built the AI.</span>
+    </p>
+    <div class="twins rv" style="--i:2">
+      <div class="panel">
+        <div class="person">
+          <div class="init">HR</div>
+          <div>
+            <h3>Humberto A. Rodriguez</h3>
+            <p><b><span class="es">28 años</span><span class="en">28 years</span></b> <span class="es">de ingeniería en petróleo y gas. Sabe qué se puede tocar en una planta — y qué no.</span><span class="en">of oil &amp; gas engineering. Knows what you can touch in a plant — and what you can't.</span></p>
+          </div>
+        </div>
       </div>
-      <div>
-        <span data-cmp="tag" class="dev"><span class="es">0–6 meses</span><span class="en">0–6 months</span></span>
-        <h3><span class="es">Cuña comunitaria + design partner</span><span class="en">Community wedge + design partner</span></h3>
-        <p style="margin-top:6px"><span class="es">Herramienta de simulación en vivo, tracción en CACHE, backtest con datos reales del design partner, objetivo de LOI Q4 2026.</span><span class="en">Simulation tool live, CACHE traction, real-data backtest with design partner, LOI target Q4 2026.</span></p>
-      </div>
-      <div>
-        <span data-cmp="tag" class="dev"><span class="es">6–18 meses</span><span class="en">6–18 months</span></span>
-        <h3><span class="es">Despliegue en sombra</span><span class="en">Shadow deployment</span></h3>
-        <p style="margin-top:6px"><span class="es">Gateway edge, workflow del operador, recomendaciones vs. baseline medido.</span><span class="en">Edge gateway, operator workflow, recommendations vs. measured baseline.</span></p>
-      </div>
-      <div>
-        <span data-cmp="tag" class="vision"><span class="es">18–30 meses</span><span class="en">18–30 months</span></span>
-        <h3><span class="es">Autonomía controlada</span><span class="en">Controlled autonomy</span></h3>
-        <p style="margin-top:6px"><span class="es">De asesoría supervisada a control restringido en ventanas operativas acotadas.</span><span class="en">From supervised advisory to restricted control in bounded operating windows.</span></p>
+      <div class="panel">
+        <div class="person">
+          <div class="init red">JM</div>
+          <div>
+            <h3>José M. Rodriguez Mortaloni</h3>
+            <p><span class="es">Construyó <b>toda la IA de SimPlant</b>: el simulador, las reglas y el sistema que aprende.</span><span class="en">Built <b>all of SimPlant's AI</b>: the simulator, the rules, and the learning system.</span></p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-  <footer data-cmp="foot">
-    <div><span class="es">SimPlant · Autonomía restringida</span><span class="en">SimPlant · Restricted autonomy</span></div>
-    <div class="num">12 / 15</div>
+  <footer class="bot">
+    <div class="note">
+      <span class="es">Cofundadores con relación familiar declarada · reglas de socios firmadas (vesting 4 años / cliff 1 año). Próxima suma al equipo: un ingeniero senior de IA segura.</span>
+      <span class="en">Co-founders with declared family relationship · signed partner rules (4-year vesting / 1-year cliff). Next hire: a senior safe-AI engineer.</span>
+    </div>
+    <div class="num">14 / 16</div>
   </footer>
 </section>
 
-<!-- ═══════════ 15 · LA RONDA ═══════════ -->
+<!-- ═══════════ 15 · LA INVERSIÓN ═══════════
+     Concepto: qué pedimos y para qué. Ancla: ecuación 500K → piloto. -->
 <section class="slide" id="s15">
-  <header data-cmp="topbar">
-    <div>BytesBricks<span style="color:var(--accent)">.</span></div>
-    <div class="chip"><span class="es">12 · La ronda</span><span class="en">12 · Investment ask</span></div>
-    <div class="sect"><span class="es">Uso de fondos</span><span class="en">Use of funds</span></div>
+  <header class="top">
+    <div class="brand">BytesBricks<b>.</b></div>
+    <div class="chip">SimPlant</div>
+    <div class="sect"><span class="es">La inversión</span><span class="en">The ask</span></div>
   </header>
-  <div class="content">
-    <div class="head">
-      <h2 class="rv" data-cmp="title" style="--i:0">
-        <span class="es">Levantamos <em>US$500K vía SAFE</em> para 18 meses de runway. El capital convierte la validación en gemelo en la primera referencia industrial.</span>
-        <span class="en">Raising <em>US$500K via SAFE</em> for 18 months of runway. Capital converts twin validation into the first industrial reference.</span>
-      </h2>
-      <p class="sub rv" data-cmp="sub" style="--i:1">
-        <span class="es">Burn austero con ingeniería senior local; la contratación de ventas enterprise se difiere. El capital financia profundidad de ingeniería, la cuña comunitaria y el primer piloto sombra — no tres contrataciones senior.</span>
-        <span class="en">Lean burn on local senior engineering; the enterprise sales hire is deferred. Capital funds engineering depth, the community wedge, and the first shadow pilot — not three senior hires.</span>
-      </p>
-    </div>
-    <div class="rulegrid split rv" data-cmp="funds" style="--i:2">
-      <div class="rows-tight" style="padding-top:4px;padding-bottom:4px">
-        <div data-cmp="row" style="border-top:0">
-          <strong style="font-family:var(--display);font-size:var(--t-h3)">55–60%</strong>
-          <p><span class="es">Equipo: ingeniero senior de Safe-RL/ML, advisor de O&amp;G con credenciales, soporte de seguridad funcional. Ventas enterprise diferido.</span><span class="en">Team: senior Safe-RL/ML engineer, credentialed O&amp;G advisor, functional safety support. Enterprise sales hire deferred.</span></p>
-        </div>
-        <div data-cmp="row">
-          <strong style="font-family:var(--display);font-size:var(--t-h3)">20%</strong>
-          <p><span class="es">Piloto e integración OT: gateway edge, trabajo con datos de planta, viajes, soporte de despliegue.</span><span class="en">Pilot &amp; OT integration: edge gateway, plant data work, travel, deployment support.</span></p>
-        </div>
-        <div data-cmp="row">
-          <strong style="font-family:var(--display);font-size:var(--t-h3)">10%</strong>
-          <p><span class="es">Ciber y seguridad: postura IEC 62443, documentación del camino SIL, revisión externa.</span><span class="en">Cyber &amp; safety: IEC 62443 posture, SIL pathway documentation, external review.</span></p>
-        </div>
-        <div data-cmp="row">
-          <strong style="font-family:var(--display);font-size:var(--t-h3)">10–15%</strong>
-          <p><span class="es">Legal, IP, seguros, estructura corporativa, buffer operativo.</span><span class="en">Legal, IP, insurance, corporate structure, operating buffer.</span></p>
-        </div>
-      </div>
-      <div>
-        <span data-cmp="tag" class="today"><span class="es">Qué compra US$500K</span><span class="en">What US$500K buys</span></span>
-        <ul>
-          <li><span class="es">Tracción comunitaria + herramienta de simulación con usuarios ingenieros de procesos</span><span class="en">Community traction + simulation tool with process-engineer users</span></li>
-          <li><span class="es">Backtest con datos reales de un design partner (mes 6)</span><span class="en">Real-data backtest with a design partner (Month 6)</span></li>
-          <li><span class="es">Kickoff de piloto sombra firmado (mes 9–12)</span><span class="en">Signed shadow pilot kickoff (Month 9–12)</span></li>
-          <li><span class="es">Gemelo de antorcha reutilizable y toolkit de restricciones</span><span class="en">Reusable flare twin and constraint toolkit</span></li>
-          <li><span class="es"><strong>El delta auditado en planta viva es la ronda siguiente</strong> — no se promete en 18 meses</span><span class="en"><strong>Audited live-plant delta is the round after this one</strong> — not promised in 18 months</span></li>
-        </ul>
-      </div>
+  <div class="mid">
+    <div class="kicker rv" style="--i:0"><span class="es">Qué buscamos</span><span class="en">What we're raising</span></div>
+    <p class="sent rv" style="--i:1">
+      <span class="es">Con <em>US$500 mil</em> llegamos a la primera refinería real.</span>
+      <span class="en">With <em>US$500K</em> we reach the first real refinery.</span>
+    </p>
+    <div class="eq rv" style="--i:2">
+      <div class="box"><div class="n">US$ 500 K</div><div class="l"><span class="es">Inversión</span><span class="en">Investment</span></div></div>
+      <div class="sym" aria-hidden="true">→</div>
+      <div class="box"><div class="n">18</div><div class="l"><span class="es">Meses de trabajo</span><span class="en">Months of runway</span></div></div>
+      <div class="sym" aria-hidden="true">→</div>
+      <div class="box red"><div class="n">1ª</div><div class="l"><span class="es">Prueba real paga</span><span class="en">Paid real-plant test</span></div></div>
     </div>
   </div>
-  <footer data-cmp="foot">
-    <div><span class="es">SimPlant · Autonomía restringida</span><span class="en">SimPlant · Restricted autonomy</span></div>
-    <div class="num">13 / 15</div>
+  <footer class="bot">
+    <div class="note">
+      <span class="es">Instrumento SAFE · el fondo paga equipo técnico chico, la herramienta comunitaria y el primer piloto pago — sin promesas que no podamos cumplir en 18 meses.</span>
+      <span class="en">SAFE instrument · funds a small technical team, the community tool, and the first paid pilot — no promises we can't keep in 18 months.</span>
+    </div>
+    <div class="num">15 / 16</div>
   </footer>
 </section>
 
-<!-- ═══════════ 16 · EQUIPO ═══════════ -->
+<!-- ═══════════ 16 · CIERRE ═══════════
+     Concepto: la visión en una línea. Ancla: marca + llama. -->
 <section class="slide" id="s16">
-  <header data-cmp="topbar">
-    <div>BytesBricks<span style="color:var(--accent)">.</span></div>
-    <div class="chip"><span class="es">13 · Equipo</span><span class="en">13 · Team</span></div>
-    <div class="sect"><span class="es">Autoridad</span><span class="en">Authority</span></div>
-  </header>
-  <div class="content">
-    <h2 class="rv" data-cmp="title" style="--i:0">
-      <span class="es">Autoridad técnica y de dominio para <em>desplegar con seguridad</em>.</span>
-      <span class="en">Domain and technical authority to <em>deploy safely</em>.</span>
-    </h2>
-    <div class="rulegrid cols2 rv" data-cmp="people" style="--i:1">
-      <div data-cmp="person">
-        <div class="init" aria-hidden="true">JM</div>
-        <div>
-          <h3>José Martín Rodriguez Mortaloni</h3>
-          <p><span class="es">Construyó desde cero el stack de Safe RL de SimPlant y la arquitectura edge OPC-UA. Publica trabajo técnico en CACHE. Ingeniería en Sistemas de Información (último año). Ingeniería liderada por el founder; contratación senior de ML/seguridad planificada.</span><span class="en">Built the SimPlant Safe RL stack and OPC-UA edge architecture from scratch. Publishes technical work in CACHE. Information Systems Engineering (final year). Founder-led engineering; senior ML/safety hire planned.</span></p>
-        </div>
-      </div>
-      <div data-cmp="person">
-        <div class="init" aria-hidden="true">HR</div>
-        <div>
-          <h3>Ing. Humberto A. Rodriguez</h3>
-          <p><span class="es">28+ años en ingeniería de O&amp;G. Traduce PHA/LOPA en restricciones CMDP estrictas. Fuente de los dos proyectos reales de ingeniería que calibran el gemelo (foso de datos propietario).</span><span class="en">28+ years in O&amp;G engineering. Translates PHA/LOPA into strict CMDP constraints. Source of the two real engineering projects that calibrate the twin (proprietary data moat).</span></p>
-        </div>
-      </div>
-    </div>
-    <div data-cmp="claim" class="rv" style="--i:2">
-      <span data-cmp="tag" class="dev"><span class="es">Plan de contratación</span><span class="en">Hiring plan</span></span>
-      <p style="font-size:var(--t-small)">
-        <span class="es"><strong>Prioridad de corto plazo:</strong> ingeniero senior de Safe-RL/ML + advisor de O&amp;G con credenciales (operaciones o proveedor de APC) — para profundizar el único pilar técnico y abrir el canal de design partners. La contratación de ventas enterprise se difiere hasta probar una cuña repetible.</span>
-        <span class="en"><strong>Near-term priority:</strong> senior Safe-RL/ML engineer + a credentialed O&amp;G advisor (operations or APC-vendor background) — to deepen the single technical pillar and open the design-partner channel. Enterprise sales hire deferred until a repeatable wedge is proven.</span>
-      </p>
-    </div>
-  </div>
-  <footer data-cmp="foot">
-    <div>
-      <span class="es">Relación familiar declarada entre cofundadores · gobernanza con vesting de 4 años / cliff de 1 año</span>
-      <span class="en">Family relationship declared between co-founders · governance with 4-year vesting / 1-year cliff</span>
-    </div>
-    <div class="num">14 / 15</div>
-  </footer>
-</section>
-
-<!-- ═══════════ 17 · CIERRE ═══════════ -->
-<section class="slide" id="s17">
-  <header data-cmp="topbar">
-    <div>BytesBricks<span style="color:var(--accent)">.</span></div>
-    <div class="chip"><span class="es">Reclamo de categoría</span><span class="en">Category claim</span></div>
+  <header class="top">
+    <div class="brand">BytesBricks<b>.</b></div>
+    <div class="chip">SimPlant</div>
     <div class="sect"><span class="es">Cierre</span><span class="en">Close</span></div>
   </header>
-  <div class="content" style="max-width:1200px">
-    <h1 class="rv" data-cmp="title" style="--i:0">
-      <span class="es">La autonomía industrial será <em>restringida, auditada</em> y desplegada en el edge.</span>
-      <span class="en">Industrial autonomy will be <em>restricted, audited</em>, and deployed at the edge.</span>
-    </h1>
-    <div data-cmp="hazard" class="rv" style="--i:1" role="presentation"></div>
-    <p class="sub rv" data-cmp="sub" style="--i:2">
-      <span class="es">SimPlant empieza donde el dolor es urgente y el foso es real: sistemas de gas de antorcha de refinería en infraestructura crítica.</span>
-      <span class="en">SimPlant starts where the pain is urgent and the moat is real: refinery flare-gas systems in critical infrastructure.</span>
+  <div class="mid center">
+    <div class="giant g-center rv pop" style="--i:0">
+      <span class="gnum" style="font-size:230px">SimPlant<span style="color:var(--accent)">.</span></span>
+    </div>
+    <div class="hazardbar rv" style="--i:1"></div>
+    <p class="sent rv" style="--i:2;font-size:64px">
+      <span class="es">Las plantas del futuro se van a manejar solas — <em>y eso empieza por la llama</em>.</span>
+      <span class="en">Tomorrow's plants will run themselves — <em>and that starts with the flame</em>.</span>
+    </p>
+    <p class="sub rv" style="--i:3">
+      <span class="es"><b>BytesBricks</b> · Seed 2026 · bytesbricksai.github.io</span>
+      <span class="en"><b>BytesBricks</b> · Seed 2026 · bytesbricksai.github.io</span>
     </p>
   </div>
-  <footer data-cmp="foot">
-    <div>
-      <span class="es">La autonomía de control para infraestructura industrial es una categoría de plataforma — no una solución puntual. Rev 5 · Julio 2026.</span>
-      <span class="en">Control autonomy for industrial infrastructure is a platform category — not a point solution. Rev 5 · July 2026.</span>
+  <footer class="bot">
+    <div class="note">
+      <span class="es">Gracias. Preguntas bienvenidas — también las difíciles.</span>
+      <span class="en">Thank you. Questions welcome — the hard ones too.</span>
     </div>
-    <div class="num">15 / 15</div>
+    <div class="num">16 / 16</div>
   </footer>
 </section>
+
+</main>
+</div>
+
+<nav class="deck-controls" aria-label="Navegación de slides"></nav>
 
 <script>
 /* ════════════════════════════════════════════════════════════════
-   CONTROLADOR DE PRESENTACIÓN
+   CONTROLADOR DE PRESENTACIÓN — escenario fijo 16:9
+   — Escala: el stage 1920×1080 se escala entero al viewport
+   — Navegación: ↑↓ ←→ · Espacio · PgUp/PgDn · Home/End · rueda ·
+     swipe · puntos inferiores · hash #n en la URL
    — Idioma: botones ES/EN o tecla L (persiste en localStorage)
-   — Navegación: ↑↓ ←→ · Espacio · PgUp/PgDn · Home/End · puntos
-   — Reveals: IntersectionObserver agrega .visible por slide
-   — Barra de progreso: scaleX según el scroll
+   — Edición: tecla E o esquina sup. izq. (designMode) · Ctrl+S descarga
    ════════════════════════════════════════════════════════════════ */
 document.documentElement.classList.add('js');
 
 (function(){
-  'use strict';
-  const slides=[...document.querySelectorAll('.slide')];
-  const dotsNav=document.querySelector('.nav-dots');
-  const progress=document.querySelector('.progress');
+'use strict';
 
-  /* ── Idioma ── */
-  const langBtns=[...document.querySelectorAll('.lang-switch button')];
-  function setLang(lang){
-    document.documentElement.dataset.lang=lang;
-    document.documentElement.lang=lang;
-    langBtns.forEach(b=>b.classList.toggle('active',b.dataset.set===lang));
-    try{localStorage.setItem('deck-lang',lang)}catch(e){}
+/* ── Contenido editado previamente: restaurar antes de arrancar ── */
+try{
+  const saved=localStorage.getItem('deck8-html');
+  if(saved) document.getElementById('deckStage').innerHTML=saved;
+}catch(e){}
+
+const stage=document.getElementById('deckStage');
+const slides=[...stage.querySelectorAll('.slide')];
+const dotsNav=document.querySelector('.deck-controls');
+const progress=document.querySelector('.progress i');
+let current=0, editing=false;
+
+/* ── Grillas de cuadrados (1 cuadrado = 1 unidad) ── */
+stage.querySelectorAll('.sqgrid').forEach(grid=>{
+  if(grid.children.length) return;             // ya restaurado desde localStorage
+  const n=+grid.dataset.squares||0, hot=+grid.dataset.hot||0;
+  for(let i=0;i<n;i++){
+    const sq=document.createElement('i');
+    sq.style.setProperty('--i',i);
+    if(i<hot) sq.classList.add('hot');
+    grid.appendChild(sq);
   }
-  langBtns.forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.set)));
-  try{const saved=localStorage.getItem('deck-lang');if(saved==='es'||saved==='en')setLang(saved)}catch(e){}
+});
 
-  /* ── Puntos de navegación (cuadrados) ── */
-  dotsNav.innerHTML='';
-  slides.forEach((s,i)=>{
-    const b=document.createElement('button');
-    b.setAttribute('aria-label','Slide '+(i+1));
-    b.addEventListener('click',()=>slides[i].scrollIntoView({behavior:'smooth'}));
-    dotsNav.appendChild(b);
+/* ── Escalado del escenario al viewport (letterbox) ── */
+function scaleStage(){
+  const f=Math.min(innerWidth/1920,innerHeight/1080);
+  const x=(innerWidth-1920*f)/2, y=(innerHeight-1080*f)/2;
+  stage.style.transform='translate('+x+'px,'+y+'px) scale('+f+')';
+}
+scaleStage();
+addEventListener('resize',scaleStage);
+
+/* ── Puntos de navegación ── */
+dotsNav.innerHTML='';
+slides.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.setAttribute('aria-label','Slide '+(i+1));
+  b.addEventListener('click',()=>show(i));
+  dotsNav.appendChild(b);
+});
+const dots=[...dotsNav.children];
+
+/* ── Mostrar slide ── */
+function show(i){
+  current=Math.max(0,Math.min(slides.length-1,i));
+  slides.forEach((s,k)=>{
+    s.classList.toggle('active',k===current);
+    s.classList.toggle('visible',k===current);
   });
-  const dots=[...dotsNav.children];
+  dots.forEach((d,k)=>d.classList.toggle('active',k===current));
+  progress.style.transform='scaleX('+((current+1)/slides.length)+')';
+  try{history.replaceState(null,'','#'+(current+1))}catch(e){}
+}
+const fromHash=parseInt(location.hash.slice(1),10);
+show(isNaN(fromHash)?0:fromHash-1);
 
-  /* ── Observer: reveals + punto activo ── */
-  let current=0;
-  const io=new IntersectionObserver(entries=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){
-        e.target.classList.add('visible');
-        current=slides.indexOf(e.target);
-        dots.forEach((d,i)=>d.classList.toggle('active',i===current));
-      }
-    });
-  },{threshold:.55});
-  slides.forEach(s=>io.observe(s));
+/* ── Idioma ── */
+const langBtns=[...document.querySelectorAll('.lang-switch button')];
+function setLang(lang){
+  document.documentElement.dataset.lang=lang;
+  document.documentElement.lang=lang;
+  langBtns.forEach(b=>b.classList.toggle('active',b.dataset.set===lang));
+  try{localStorage.setItem('deck8-lang',lang)}catch(e){}
+}
+langBtns.forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.set)));
+try{
+  const saved=localStorage.getItem('deck8-lang');
+  if(saved==='es'||saved==='en')setLang(saved);
+}catch(e){}
 
-  /* ── Barra de progreso ── */
-  let ticking=false;
-  function paint(){
-    const max=document.documentElement.scrollHeight-innerHeight;
-    progress.style.transform='scaleX('+(max>0?scrollY/max:0)+')';
-    ticking=false;
+/* ── Teclado ── */
+addEventListener('keydown',e=>{
+  if(e.key==='e'||e.key==='E'){toggleEdit();return}
+  if(editing){
+    if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveFile()}
+    return;                                    // editando: no navegar
   }
-  addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(paint);ticking=true}},{passive:true});
-  paint();
-
-  /* ── Teclado ── */
-  function go(i){
-    const n=Math.max(0,Math.min(slides.length-1,i));
-    slides[n].scrollIntoView({behavior:'smooth'});
+  switch(e.key){
+    case'ArrowRight':case'ArrowDown':case'PageDown':case' ':e.preventDefault();show(current+1);break;
+    case'ArrowLeft':case'ArrowUp':case'PageUp':e.preventDefault();show(current-1);break;
+    case'Home':e.preventDefault();show(0);break;
+    case'End':e.preventDefault();show(slides.length-1);break;
+    case'l':case'L':setLang(document.documentElement.dataset.lang==='es'?'en':'es');break;
   }
-  addEventListener('keydown',e=>{
-    if(e.target.matches('input,textarea,[contenteditable]'))return;
-    switch(e.key){
-      case'ArrowDown':case'ArrowRight':case'PageDown':case' ':e.preventDefault();go(current+1);break;
-      case'ArrowUp':case'ArrowLeft':case'PageUp':e.preventDefault();go(current-1);break;
-      case'Home':e.preventDefault();go(0);break;
-      case'End':e.preventDefault();go(slides.length-1);break;
-      case'l':case'L':setLang(document.documentElement.dataset.lang==='es'?'en':'es');break;
-    }
-  });
+});
+
+/* ── Rueda del mouse (con bloqueo anti-rebote) ── */
+let wheelLock=0;
+addEventListener('wheel',e=>{
+  if(editing)return;
+  const now=Date.now();
+  if(now-wheelLock<650||Math.abs(e.deltaY)<24)return;
+  wheelLock=now;
+  show(current+(e.deltaY>0?1:-1));
+},{passive:true});
+
+/* ── Swipe táctil ── */
+let tx=0,ty=0;
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{
+  if(editing)return;
+  const dx=e.changedTouches[0].clientX-tx, dy=e.changedTouches[0].clientY-ty;
+  if(Math.max(Math.abs(dx),Math.abs(dy))<50)return;
+  if(Math.abs(dx)>Math.abs(dy)) show(current+(dx<0?1:-1));
+  else show(current+(dy<0?1:-1));
+},{passive:true});
+
+/* ── Modo edición: designMode + guardado ── */
+const editToggle=document.getElementById('editToggle');
+const hotzone=document.querySelector('.edit-hotzone');
+function toggleEdit(){
+  editing=!editing;
+  document.designMode=editing?'on':'off';
+  document.body.classList.toggle('editing',editing);
+  editToggle.classList.toggle('active',editing);
+  if(!editing){
+    try{localStorage.setItem('deck8-html',stage.innerHTML)}catch(e){}
+  }
+}
+function saveFile(){
+  const blob=new Blob(['<!DOCTYPE html>\n'+document.documentElement.outerHTML],{type:'text/html'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='bytesbricks-pitch-deck-rev8-editado.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+editToggle.addEventListener('click',toggleEdit);
+let hideT=null;
+hotzone.addEventListener('mouseenter',()=>{clearTimeout(hideT);editToggle.classList.add('show')});
+hotzone.addEventListener('mouseleave',()=>{hideT=setTimeout(()=>{if(!editing)editToggle.classList.remove('show')},400)});
+editToggle.addEventListener('mouseenter',()=>clearTimeout(hideT));
+editToggle.addEventListener('mouseleave',()=>{hideT=setTimeout(()=>{if(!editing)editToggle.classList.remove('show')},400)});
+
 })();
 </script>
 </body>
 </html>
+
